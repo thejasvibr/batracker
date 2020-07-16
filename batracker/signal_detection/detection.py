@@ -15,12 +15,11 @@ def detect_signal(audio,fs, **kwargs):
     fs : float>0
         sample rate
     signal_detector : function, optional
-        The function used to detect a signal. Defaults to the click_detector
-        function.
+        The function used to detect a signal. Defaults to the click_detector function.
 
     Returns
     -------
-    multichannel_candidates : List with sublists
+    multichannel_candidates : List with sublists.
         The start and stop times where the signal is in each channel. 
         Each sublist contains the candidate signal regions for a channel.
         Each candidate signal region is a tuple with the start and end times
@@ -32,7 +31,7 @@ def detect_signal(audio,fs, **kwargs):
     [ [(0.1,0.3),(0.5,0.8),(0.9,1.2)],
       [],
       [(0.2,0.9), (.9,1.2), (1.23,1.26)]
-      ]
+    ]
     This implies the input audio was a 3 channel recording. 
     The first channel showed three detections, the second channel had zero detections, 
     and the third channel had three detections too. Note that all channels do not
@@ -58,43 +57,43 @@ def detect_signal(audio,fs, **kwargs):
     return multichannel_candidates
         
 
-    def click_detector(one_channel, fs, **kwargs):
-        '''
-        Any region above a given threshold is considered  valid sound, and 
-        its start and stop times are output.
+def click_detector(one_channel, fs, **kwargs):
+    '''
+    Any region above a given threshold is considered  valid sound, and 
+    its start and stop times are output.
 
-        Parameters
-        ----------
-        one_channel : np.array
-            Audio for a single channel
-        fs : float>0
-            Samplerate
-        threshold: float, optional
-            The threshold above which a sound is considered a signal 
-        
-        Returns
-        -------
-        candidate_regions : list with tuples
-            Each tuple consists of two floats with the 
-            start and stop time of the candidate signal region
+    Parameters
+    ----------
+    one_channel : np.array
+        Audio for a single channel
+    fs : float>0
+        Samplerate
+    threshold: float, optional
+        The threshold above which a sound is considered a signal 
+    
+    Returns
+    -------
+    candidate_regions : list with tuples
+        Each tuple consists of two floats with the 
+        start and stop time of the candidate signal region
 
-        '''
-        threshold = kwargs.get('threshold', -20) # dB rms / PEAKS -DECIDE
-        
-        # Generate a moving rms or some kind of other sound profile ? -- 
-        # Perhaps also a Hilbert transform envelope? 
-        
-        
-        # Use scipy.ndimage.find_objects to get all continuous stretches of 
-        # signal above the threshold 
-        
-        # reformat the ndimage tuples and return them.
-        
-        
-        
+    '''
+    threshold = kwargs.get('threshold', -20) # dB rms / PEAKS -DECIDE
+    
+    # Generate a moving rms or some kind of other sound profile ? -- 
+    # Perhaps also a Hilbert transform envelope? 
+    
+    
+    # Use scipy.ndimage.find_objects to get all continuous stretches of 
+    # signal above the threshold 
+    
+    # reformat the ndimage tuples and return them.
     
     
     
-    
-    
-    
+
+
+
+
+
+

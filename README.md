@@ -37,7 +37,7 @@ Acoustic tracking in 2D can be performed with two synchronised channels, and in 
 ## Program Inputs and Outputs
 
 ### Inputs
-The most basic information ```batracker``` requires is the geometry of the microphone array with which the recordings were made. If you only have recordings and no direct measurements of the microphone position, try out other packages like [StructureFromSound](linkhere) and come back with the microphone position estimates. 
+The most basic information ```batracker``` requires are 1) a multichannel audio recording and 3) the xyz coordinates of the microphone array with which the recordings were made. If you only have recordings and no direct measurements of the microphone position, try out other packages like [StructureFromSound](linkhere) and come back with the microphone position estimates. 
 
 ### Outputs
 The outputs produced by ```batracker``` are the 3D positions of the emitted sound. Especially when dealing with recordings from the field - these position estimates need to be taken with a pinch of salt! Remember that under low signal-to-noise ratios the position estimation will be off, and moreover, in the case of tracking animals, there are many variables that can't be controlled (eg. call directionality, reflections) which will invariably lead to poor fixes. The raw positions need to be further processed by a separate package such as [position_inspector](fictionalpagehere).
