@@ -1,9 +1,11 @@
-'''
+'''Localiser module
+
 Deals with assigning signals across channels to the same sound, 
 and localising the sound to its source
 '''
 
 import numpy as np 
+#from schau_robinson_1987 import schau_robinson_solution
 
 
 def localise(multichannel_candidates, microphone_positions, **kwargs):
@@ -18,6 +20,11 @@ def localise(multichannel_candidates, microphone_positions, **kwargs):
         Each mic is in a new row
     v_sound : float, optional
         Speed of sound in m/s. Defaults to 331 m/s. 
+    formulation : str
+        The mathematical formulation used to localise sounds
+        Available options include 
+        #. Schau & Robinson 1987, IEEE Trans. Acoust. Speech & Sig. Proc.
+            
 
     Returns
     -------

@@ -17,16 +17,16 @@ There are two main parts of any kind of acoustic tracking
     may need special detection algorithms (eg. simple thresholds, neural networks), and this part of the package
     provides the API for detection only. 
 
-#. Signal localisation:
-    This part deals with the actual act of localising. Localising a signal in space requires calculating the 
-    time-difference of arrivals (TDOA) of the same signal across channels. The TDOAs can be calculated using 
-    various algorithms too. This part of the package deals with the act of calculating the TDOAs and generating
-    the source signal positions.
-
 .. toctree::
     :maxdepth: 1
     
     other_rst/signal_localication.rst
+
+This part deals with the actual act of localising. Localising a signal in space requires calculating the 
+time-difference of arrivals (TDOA) of the same signal across channels. The TDOAs can be calculated using 
+various algorithms too. This part of the package deals with the act of calculating the TDOAs and generating
+the source signal positions.
+
 
 
 

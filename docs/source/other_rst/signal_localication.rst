@@ -19,7 +19,12 @@ across all the channels.
 
 signal localisation API
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 .. automodule:: batracker.localisation.localiser
    :members:
+
+.. automodule:: batracker.localisation.schau_robinson_1987
+   :members:
+
 
 
