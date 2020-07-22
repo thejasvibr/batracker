@@ -9,6 +9,18 @@ a series of intersecting spheres, instead of hyperbolas. This also means that
 there are two possible solutions to the localisation. The user will need to choose
 the relevant option. 
 
+The input variables
+-------------------
+The Schau & Robinson paper defines a bunch of input variables:
+    #. :math:`M`
+    #. :math:`d`
+    #. :math:`x`
+    #. :math:`\Delta`  , where :math:`\Delta` itself is a matrix with
+       :math:`{R_{i}}^2 - {d_{i4}}^2`. :math:`R_{i}` is the distance from 
+       mic `i` to the origin (mic 4), and :math:`d_{i4}` is the range
+       difference to the source between mic `i` and mic 4 (Eqn. 1), :math:`d_{i4}=D_{i}-D_{4}`
+
+
 References
 ----------
 
@@ -31,6 +43,25 @@ def schau_robinson_solution():
     TDOA
     v_sound
     '''
+
+def parse_for_equation13(M, d, Delta):
+    '''Converts the simple M,d,Delta inputs into the quadratic
+    type forms.
+    
+    Parameters
+    ----------
+    M
+    d
+    Delta
+    
+    Returns
+    -------
+    a
+    b
+    c
+    '''
+    
+    
 
 
 def equation_13(a, b, c):
