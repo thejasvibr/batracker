@@ -32,17 +32,52 @@ TODO:
 
 """
 import numpy as np
+import scipy.spatial as spatial
 
-
-
-def schau_robinson_solution():
+def schau_robinson_solution(array_geometry, d):
     '''
     Parameters
     ----------
-    array_geometry
-    TDOA
-    v_sound
+    array_geometry: np.array
+        A 4x3 array with xyz coordinates of 4 mics.
+        The last mic will be taken as the reference microphone.
+    d:  np.array
+        A 3x1 np.array with the range_differences to the source. 
+        All range_differences (:math:`d_{i4}`), are calculated by
+        taking :math:`D_{i}-D_{4}`, where :math:`D` is the direct
+        range from a mic to the source.
+    
+    Returns
+    -------
+    x_real_world : list
+        A list with 2 3x1 np.arrays with the x,y,z positions of the source.
+        The two xyz positions describe two possible solutions to the given 
+        array geometry and range differences.
     '''
+    ref_microphone_position = array_geometry[-1,:]
+    array_geom_refm4 = array_geometry-ref_microphone_position
+    M = array_geom_refm4[:-1,:] # a 3x3 matrix
+    R_matrix = np.apply_along_axis(spatial.distance.euclidean,
+                                   1,array_geom_refm4,
+                                   np.zeros(3))
+
+    R = (R_matrix[:-1]).reshape(3,1)
+    Delta = R**2-d**2
+    
+    a,b,c = parse_for_equation13(M, d, Delta)
+    Rs = equation_13(a,b,c)
+    
+    x = equation_10(M, Delta, Rs, d)
+    
+    # place it back into real world coordinated
+    x_real_world = [each.flatten() + ref_microphone_position for each in x]
+    
+    return x_real_world
+    
+
+    
+    
+    
 
 def parse_for_equation13(M, d, Delta):
     '''Converts the simple M,d,Delta inputs into the quadratic
@@ -50,17 +85,33 @@ def parse_for_equation13(M, d, Delta):
     
     Parameters
     ----------
-    M
-    d
-    Delta
+    M: np.array
+        A 3x3 array
+    d: np.array
+        A 3x1 array
+    Delta: 
+        A 3x1 array
     
     Returns
     -------
-    a
-    b
-    c
+    a, b, c : np.array
+        1x1 np.arrays with a single value
     '''
+    check_array_shape(M, (3,3))
+    check_array_shape(d, (3,1))
+    check_array_shape(Delta, (3,1))
     
+    M_inv = np.linalg.inv(M)
+    Minv_transp_into_Minv = (M_inv.T).dot(M_inv)
+    
+    a = 4 - 4*(d.T).dot(Minv_transp_into_Minv.dot(d))
+    
+    b_leftterm = 2*(d.T).dot(Minv_transp_into_Minv.dot(Delta))
+    b_rightterm = 2*(Delta.T).dot(Minv_transp_into_Minv.dot(d))
+    b = b_leftterm + b_rightterm 
+    
+    c = -( (Delta.T).dot(Minv_transp_into_Minv.dot(Delta)))
+    return a,b,c
     
 
 
@@ -79,13 +130,22 @@ def equation_13(a, b, c):
         Defined as :math:`2d^T {M^{-1}}^{T} M^{-1} \Delta + 2{\Delta}^{T}{M^{-1}}^{T}M^{-1} d`
     c : float
         Defined as :math:`-[{\Delta}^T {M^{-1}}^{T}M^{-1} \Delta]`
-        
     
-    
+    Returns
+    -------
+    Rs : tuple
+        Tuple with both solutions of the quadratic equation.
     '''
-    Rs_plus = (-b + np.sqrt(b**2-4*a*c))/(2*a)
-    Rs_minus = (-b - np.sqrt(b**2-4*a*c))/(2*a) 
-    return Rs_plus, Rs_minus
+    denominator = 2*a
+    squareroot_term = np.sqrt(b**2 - 4*a*c)
+    
+    numerator_plus = -b + squareroot_term
+    numerator_minus = -b - squareroot_term
+    
+    Rs_plus = numerator_plus/denominator
+    Rs_minus = numerator_minus/denominator
+    Rs = (Rs_plus, Rs_minus)
+    return Rs
 
 
 def equation_10(M, Delta, Rs, d):
@@ -123,7 +183,17 @@ def equation_10(M, Delta, Rs, d):
     are relevant for the situation.   
     
     '''
-    
-    X_1 = 0.5*np.invert(M)*(Delta-2*Rs[0]*d)
-    X_2 = 0.5*np.invert(M)*(Delta-2*Rs[1]*d)
+    M_inv = np.linalg.inv(M)
+    X_1 = 0.5*M_inv.dot(Delta-2*Rs[0]*d)
+    X_2 = 00.5*M_inv.dot(Delta-2*Rs[1]*d)
     return X_1, X_2
+
+
+def check_array_shape(X, expected_shape):
+    if X.shape != expected_shape:
+        raise WrongShape(f'Expected to get array shaped {expected_shape},\
+                         but got one of shape {X.shape} instead')
+
+
+class WrongShape(IndexError):
+    pass
