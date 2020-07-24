@@ -19,6 +19,12 @@ There are two main parts of any kind of acoustic tracking
 
 .. toctree::
     :maxdepth: 1
+
+    other_rst/signal_detection.rst
+
+
+.. toctree::
+    :maxdepth: 1
     
     other_rst/signal_localication.rst
 

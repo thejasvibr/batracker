@@ -1,5 +1,30 @@
 '''
+Detection API
+=============
+
 Deals with the actual detection of signals in multichannel audio files. 
+There are two problems that need to solved while detecting a signal of interest.
+    #. within-channel signal detection
+    #. across-channel correspondence matching
+
+Within-channel signal detection
+-------------------------------
+This task involves `locally` checking if there are any signals of interest in one channel at a time. The exact methods used for 
+the within-channel can be set by the user, though the simplest is of course a basic threshold-type detector. Whenever the 
+signal goes beyond a particular threshold, a signal is considered to be in that region.
+
+
+Across-channel correspondence matching
+--------------------------------------
+After having detected the signals across all channels, they now need to be matched to each other. For sensible time-difference-of-arrivals, 
+the 'correct' signal detections across channels need to be matched. In single-animal cases, where the animal emits discrete sounds with 
+large enough inter-sound intervals, this can be achieved simple by assuming all sounds within :math:`\Delta\ T` of each other are from the
+same source. However, with larger arrays, and multiple animals things can get tricky. Moreover, sometimes it may not be possible to decide the
+correspondence solely from the audio data itself, and may require the assistance of another data channel, eg. video. 
+
+The simplest case `batracker` deals with is the single animal case, where the signal correspondence problem is easily solved by checking for 
+all signals within :math:`\pm\ \DeltaT` of the focal signal.
+
 '''
 
 import scipy.signal as signal 
