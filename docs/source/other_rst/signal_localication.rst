@@ -1,5 +1,5 @@
-Signal localisation
-===================
+Signal localisation (Detailed)
+==============================
 
 Let's begin with a simple example. Assuming signal detection has already been performed, here we'll localise a single set of detections for one signal 
 across all the channels. 
