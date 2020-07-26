@@ -1,0 +1,4 @@
+array_geometry: array_geom.csv
+sample_rate: 250000
+sim_name: batracker_simple
+source_position: source_pos.csv
