@@ -12,6 +12,13 @@ Welcome to batracker's documentation!
 `batracker` is designed to help you track sounds with a modular design. 
 There are four main parts of any kind of acoustic tracking:
 
+`Project under construction !!`
+-------------------------------
+This project is currently under construction, and most of the functions are currently in prototyping stage.
+This page is a place to dump my thoughts and organise the project. I'm currently devoted limited time per day 
+on this project, and am looking to formally find funding to push this project forward majorly. If you're interested
+in collaborating on this repo do send me a message at thejasvib@gmail.com. 
+
 Signal detection
 ----------------
 
