@@ -11,20 +11,6 @@ The maximum inter-channel delay is calculated based on the longest dimension of 
 array, from the reference mic to the focal mic. 
 
 
-Important variables
--------------------
-
-#. Maximum distance from reference mic to other mics
-#. Inter-sound interval
-#. Sound duration 
-
-Scenarios to handle
--------------------
-The most important thing to check is if correspondence matching based on the 
-max array distance works. It `will` work when 
-
-What happens when the inter-sound interval drops below that of the max-array distance, 
-and which rules work better then?
 
 Possible approaches
 """
