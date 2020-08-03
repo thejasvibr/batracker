@@ -51,12 +51,30 @@ Important variables
 Scenarios to handle
 -------------------
 The most important thing to check is if correspondence matching based on the 
-max array distance works. It `will` work when 
+max array distance works. It `will` work when there are few sounds, and these sounds are spaced far apart in time.
 
+Easy case: when all signals are detected well
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Then it's mostly just a question of matching the first sounds across all channels, and then the second, and so on till all `N` sounds have been matched. 
+
+Not so  easy cases: high 'signal density'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 What happens when the inter-sound interval drops below that of the max-array distance, 
 and which rules work better then?
 
 .. image:: ../_static/schematics_correspondence.png
+
+Not so  easy cases: high signal density and similar sounds
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Aside from the inter-sound arrival, there's also the question of signal similarity.
+How to deal with the case where the sounds are 
+
+#. Unique --> this is the 'easy' case, as any given image-base algorithm should be able to match the sounds correctly
+#. (Effectively) the same --> this is the 'tough' case, where algorithms may have a tough time. 
+
+Poor/Missed detections?
+~~~~~~~~~~~~~~~~~~~~~~~
+
 
 Possible solutions 
 ------------------

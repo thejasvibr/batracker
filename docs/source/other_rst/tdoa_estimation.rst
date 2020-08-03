@@ -1,5 +1,18 @@
 TDOA Estimation (Detailed)
 ==========================
+To localise sound using a spherical/hyperbolic formulation, the range diffferences are required to the source.
+The range differencees are calculated by measuring the time difference of arrival (TDOA) x speed of sound. 
+
+
+Selecting audio samples for TDOA estimation
+-------------------------------------------
+The correspondence matching output will be in the form of start and stop times of each call, along with the unique 
+cross-channel matched id assigned to a call. To estimate the TDOA's, a common set of samples need to be cross correlated.
+The common set of samples will need to be assigned based on the earliest and latest detected sounds. In the easy case:
+
+
+.. image:: ../_static/common_audio_regions.png
+
 
 
 

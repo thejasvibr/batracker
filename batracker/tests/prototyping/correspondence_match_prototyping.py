@@ -14,23 +14,34 @@ array, from the reference mic to the focal mic.
 
 Possible approaches
 """
-
+import matplotlib.pyplot as plt
+plt.rcParams['agg.path.chunksize'] = 10000
 import numpy as np 
-import scipy.distance as distance
+import scipy.io.wavfile as wavfile
+import scipy.spatial.distance as distance
 
-# %%
-# Example source emissions with mic array
-# Make different sets with different inter-sound delays 
+from threshold_detector_prototyping import cross_channel_threshold_detector
 
-mic_array =  np.array([[0,0,1],
-                       [0,1,0],
-                       [1,0,0],
-                       [0,0,0]])
+## % Load the simulated audio file that was previously made
 
-sources = np.array([[10,0,0],
-                    [0,10,10],
-                    [0,10,10]
-                    ])
+fs, audio = wavfile.read('simulated_audio/batracker_simple.wav')
+short_audio = audio[:fs,:]
+multi_detections = cross_channel_threshold_detector(short_audio, fs)
 
-intersound_interval = [0.004, 0.010, 0.02]
+## % 
+# Also need some kind of visualiser to see the output of the all the detections 
+# and diagnose problems.
+
+num_channels = audio.shape[1]
+all_axes = []
+plt.figure(figsize=(10,8))
+ax0 = plt.subplot(num_channels*100  + 11)
+plt.specgram(short_audio[:, 0], Fs=fs, NFFT=256, noverlap=255)
+
+for each in range(1,num_channels):
+    plt.subplot(num_channels*100  + 10+each+1, sharex = ax0)
+    plt.specgram(short_audio[:, each], Fs=fs, NFFT=256, noverlap=255)
+    
+    for every in multi_detections[each]:
+        plt.vlines(every, 0, fs*0.5, linewidth=0.5)
 

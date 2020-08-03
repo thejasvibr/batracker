@@ -15,14 +15,15 @@ plt.rcParams['agg.path.chunksize']=10000
 import numpy as np
 import scipy.io.wavfile as wav
 import scipy.ndimage as ndimage
+import tqdm
 # % Load the raw audio 
 
 audio_path = os.path.join('simulated_audio','batracker_simple.wav')
 fs, audio = wav.read(audio_path)
 
 ## % threshold detector
-plt.figure()
-plt.plot(audio[:,0])
+#plt.figure()
+#plt.plot(audio[:,0])
 
 ## % 
 def cross_channel_threshold_detector(multichannel, fs, **kwargs):
@@ -31,7 +32,7 @@ def cross_channel_threshold_detector(multichannel, fs, **kwargs):
     samples, channels = multichannel.shape
     print(channels, samples)
     all_detections = []
-    for each in range(channels):
+    for each in tqdm.tqdm(range(channels)):
         all_detections.append(threshold_detector(multichannel[:,each], fs, **kwargs))
     return all_detections
         

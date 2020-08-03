@@ -44,6 +44,8 @@ The simplest method: threshold based detection
 Whenever the audio goes beyond a particular level (in RMS), a signal is considered detected.
 This is a common (and relatively robust) algorithm that's used in many programs. 
 
+- One thing to consider with the threshold method is that if the signal isn't received with the same intensity on all channels (and also in case of mic directionality  etc.) -- then the 'wrong parts' of a signal will be cross-correlated - leading to poor localisations. How to overcome this problem? 
+
 
 Less simple methods
 ~~~~~~~~~~~~~~~~~~~

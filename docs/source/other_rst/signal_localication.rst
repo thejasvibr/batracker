@@ -13,6 +13,29 @@ across all the channels.
     position = localiser(detections, mic_array_positions, v_sound=338)
     print(position)
 
+TDOA based methods
+------------------
+Time difference of arrival (TDOA) based methods rely on calculating source position from the range differences between microphone pairs. Some of these formulations include:
+
+#.  Spherical Intersection - `SX` method (Schau & Robinson 1987): formulated for 4 microphones only 
+    Status:
+        > `Implemented, tests to be written`
+
+#. Spherical Interpolation - `SI` method (Smith & Abel 1987)
+
+#. Friedlander 1987: formulated for >= 4 microphones
+    Statue:
+        > `Not yet  implemented`
+
+
+Non-TDOA based methods
+----------------------
+There are whole bunch of methods which don't necessarily use the time difference of arrival, but instead use the direction-of-arrival, or phase differences between
+sounds recorded across mics. These methods include (unsure of exact implementation details...):
+
+#. MUSIC
+#. Beamforming 
+
 
 
 
