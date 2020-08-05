@@ -56,6 +56,13 @@ max array distance works. It `will` work when there are few sounds, and these so
 Easy case: when all signals are detected well
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Then it's mostly just a question of matching the first sounds across all channels, and then the second, and so on till all `N` sounds have been matched. 
+Though, even here - there can be issues if there is even a single call that's not been detected. The better way to do it would be to compare the inter-mic distance to 
+estimate the maximum delay possible betweeen two mics. 
+
+
+
+
+
 
 Not so  easy cases: high 'signal density'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

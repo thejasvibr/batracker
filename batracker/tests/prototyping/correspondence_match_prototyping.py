@@ -22,13 +22,14 @@ import scipy.spatial.distance as distance
 
 from threshold_detector_prototyping import cross_channel_threshold_detector
 
-## % Load the simulated audio file that was previously made
+# %%
+# Load the simulated audio file that was previously made
 
 fs, audio = wavfile.read('simulated_audio/batracker_simple.wav')
 short_audio = audio[:fs,:]
 multi_detections = cross_channel_threshold_detector(short_audio, fs)
 
-## % 
+# %% 
 # Also need some kind of visualiser to see the output of the all the detections 
 # and diagnose problems.
 

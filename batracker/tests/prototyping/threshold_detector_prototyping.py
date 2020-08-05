@@ -28,6 +28,19 @@ fs, audio = wav.read(audio_path)
 ## % 
 def cross_channel_threshold_detector(multichannel, fs, **kwargs):
     '''
+    Parameters
+    ----------
+    multichannel : np.array
+        Msamples x Nchannels audio data
+    fs : float >0
+    
+    Returns
+    -------
+    
+    Notes
+    -----
+    For further keyword arguments see the `threshold_detector` function
+    
     '''
     samples, channels = multichannel.shape
     print(channels, samples)

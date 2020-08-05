@@ -13,7 +13,7 @@ The common set of samples will need to be assigned based on the earliest and lat
 
 .. image:: ../_static/common_audio_regions.png
 
-
+s
 
 
 Estimating TDOAs when there are overlaps: some ideas

@@ -86,6 +86,14 @@ This part of the package deals with the act of using the TDOAs and generating
 the source signal positions.
 
 
+Implemented to date
+~~~~~~~~~~~~~~~~~~~
+
+#. Localisation with 4 channels when given the time-difference of arrivals 
+#. 
+
+
+
 Indices and tables
 ------------------
 
