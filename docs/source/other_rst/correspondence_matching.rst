@@ -56,8 +56,16 @@ max array distance works. It `will` work when there are few sounds, and these so
 Easy case: when all signals are detected well
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Then it's mostly just a question of matching the first sounds across all channels, and then the second, and so on till all `N` sounds have been matched. 
-Though, even here - there can be issues if there is even a single call that's not been detected. The better way to do it would be to compare the inter-mic distance to 
-estimate the maximum delay possible betweeen two mics. 
+Though, even here - there can be issues if there is even a single call that's not been detected. 
+
+#. Calculate the max distance between mics, and convert this into a maximum :math:`\pm \Delta T` delay between mics.
+
+   This  :math:`\pm \Delta T` may never actually     appear in the dataset though because often the mics are located in places far away from the sources.
+   The max :math:`\pm \Delta T` also assumes that the sources are literally beaming sound exactly in line from one mic in the farthest distance pair,
+   to the other mic. Anyway, the idea would be to generate paired :math:`\pm \Delta T` windows for every mic pair, and see which sounds fall satisfy all/most of
+   the delay windows. These are valid sources for a given detection. 
+
+
 
 
 
