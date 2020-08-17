@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-""" What to do when there are two calls which arrive very close to one another?
+"""
+When calls arrive almost/overlapping
+====================================
 
 Solution 1:
     

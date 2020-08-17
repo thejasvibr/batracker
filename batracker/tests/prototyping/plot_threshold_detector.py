@@ -34,12 +34,17 @@ def cross_channel_threshold_detector(multichannel, fs, **kwargs):
         Msamples x Nchannels audio data
     fs : float >0
     
+    
     Returns
     -------
     
     Notes
     -----
     For further keyword arguments see the `threshold_detector` function
+    
+    See Also
+    --------
+    threshold_detector
     
     '''
     samples, channels = multichannel.shape

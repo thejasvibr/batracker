@@ -14,10 +14,19 @@ There are four main parts of any kind of acoustic tracking:
 
 `Project under construction !!`
 -------------------------------
-This project is currently under construction, and most of the functions are currently in prototyping stage or in `thought-experiment` stage.
+This project is currently under construction, and most of the functions are currently in prototyping stage or in `thought-experiment` stage. 
 This page is a place to dump my thoughts and organise the project structure as I implement things. I'm currently devoting a limited time per day 
 on this project, and am looking to formally find funding to push this project forward majorly. If you're interested
 in collaborating on this repo or funding this project do send me a message at thejasvib@gmail.com. 
+
+To check out all the stuff being prototyped check it out here - I'm always happy to hear any suggestions/advice!
+
+.. toctree::
+        :maxdepth:4
+        :caption: `prototyping zone`
+
+        prototyping/index.rst
+
 
 
 Why this project

@@ -21,7 +21,7 @@ import pandas as pd
 import scipy.io.wavfile as wavfile
 import scipy.spatial as spatial
 
-from threshold_detector_prototyping import cross_channel_threshold_detector
+from plot_threshold_detector import cross_channel_threshold_detector
 
 
 def calc_intermic_distances(array_geom):
@@ -150,8 +150,10 @@ if __name__ == '__main__':
     # Load the simulated audio file that was previously made
     
     fs, audio = wavfile.read('simulated_audio/batracker_simple.wav')
-    short_audio = audio[:fs,:]
-    multi_detections = cross_channel_threshold_detector(short_audio, fs)
+    short_audio = audio[:int(fs*0.5),:]
+    multi_detections = cross_channel_threshold_detector(short_audio, fs,
+                                                        dbrms_window=0.5*10**-3,
+                                                        dbrms_threshold=-56)
     
     # %% 
     # Also need some kind of visualiser to see the output of the all the detections 
@@ -168,7 +170,8 @@ if __name__ == '__main__':
         plt.specgram(short_audio[:, each], Fs=fs, NFFT=256, noverlap=255)
         
         for every in multi_detections[each]:
-            plt.vlines(every, 0, fs*0.5, linewidth=0.5)
+            plt.vlines(every, 0, fs*0.5, linewidth=0.5, label='Detections')
+    plt.legend()
     
     # %% 
     # Matching detections to each other. 
@@ -192,6 +195,24 @@ if __name__ == '__main__':
         for every in crosscor_boundaries:
             plt.vlines(every, 0, fs*0.5,'r', linewidth=0.5, )
 
+    # show detections and cross-corr boundaries
+    plt.figure(figsize=(10,8))
+    ax1 = plt.subplot(num_channels*100  + 11)
+    plt.plot(short_audio[:, 0])
+    
+    for each in range(1,num_channels):
+        plt.subplot(num_channels*100  + 10+each+1, sharex = ax1, sharey=ax1)
+        plt.plot(short_audio[:, each])
+        
+        for every_det in multi_detections[each]:
+            det_samples = np.array(every_det)*fs
+            plt.vlines(det_samples, np.min(audio), np.max(audio), 'k', linewidth=0.75)
+        for every_cc_bound in  crosscor_boundaries:
+            bound_samples = np.array(every_cc_bound)*fs
+            plt.vlines(bound_samples, np.min(audio), np.max(audio),'r', linewidth=0.5)
+            
+    
+    
 
 
 

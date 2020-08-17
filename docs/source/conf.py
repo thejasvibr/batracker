@@ -31,7 +31,17 @@ release = '0.0.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc','sphinx.ext.napoleon',
-              'sphinx.ext.mathjax','sphinx_rtd_theme']
+              'sphinx.ext.mathjax','sphinx_rtd_theme',
+              'sphinx_gallery.gen_gallery']
+
+# The directories that sphinx-gallery will work to render
+sphinx_gallery_conf = {
+     'examples_dirs': '../../batracker/tests/prototyping/',   # path to your example scripts
+     'gallery_dirs': 'prototyping',  # path to where to save gallery generated output,
+     'image_scrapers': ('matplotlib'),
+}
+
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
