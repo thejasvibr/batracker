@@ -3,15 +3,19 @@
 """
 Start to end prototype example
 ==============================
-
+This example shows a start to end workflow which begins with detecting 
+calls across channels in an audio file, and then moving to localising the
+call positions. It ends with a display of the localised positions in comparison
+with the original simulated positions. 
 
 
 
 """
 import batracker
-from batracker.localisation import schau_robinson_1987 as sr1987
+from batracker.localisation import friedlander_1987 as fr87
 import matplotlib.pyplot as plt
 plt.rcParams['agg.path.chunksize']=10000
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np 
 import pandas as pd
 import scipy.io.wavfile as wavfile
@@ -19,11 +23,10 @@ from plot_threshold_detector import cross_channel_threshold_detector
 from plot_correspondence_matching import generate_crosscor_boundaries
 from plot_tdoa_prototyper import measure_tdoa
 
+
+
 # %% 
 # Load the simulated audio file 
-# THE TACOST WORKFLOW THROUGH THE CLI IS BROKEN -- VERIFY !!! 
-# fs, full_audio = wavfile.read('simulated_audio/batracker_simple.wav')
-# audio = full_audio[:int(fs*0.75),:] # keep the whole example short first!
 
 import tacost
 from tacost import calculate_toa as ctoa
@@ -31,19 +34,22 @@ from tacost import calculate_toa as ctoa
 # %% 
 # Generate an array geometry and use previously made  source positions
 
-mic_positions = np.array([[0,0,1],
-                       [1,0,0],
-                       [-1,0,0],
-                       [0,1,0]
+mic_positions = np.array([[ 0, 0, 0],
+                          [ 1, 0, 0],
+                          [-1, 1, 0],
+                          [ 0, 1, 0],
+                          [ 0, 0, 1]
                        ])
 
-
-test_pos = np.random.choice(np.arange(-2,5,0.5),24).reshape(-1,3)
+num_test_positions = 20
+test_pos = np.random.choice(np.arange(0,10,0.05),
+                            num_test_positions*3).reshape(-1,3)
 toa = ctoa.calculate_mic_arrival_times(test_pos,
                                        array_geometry=mic_positions)
 
 test_audio, fs = tacost.make_sim_audio.create_audio_for_mic_arrival_times(toa,
-                                                                     call_snr=80)
+                                                                     call_snr=80,
+                                                                     intersound_interval=0.025)
 audio = test_audio.copy()
 
 # %% 
@@ -51,7 +57,6 @@ audio = test_audio.copy()
 detections = cross_channel_threshold_detector(audio, fs,
                                               dbrms_window=0.5*10**-3,
                                               dbrms_threshold=-60)
-
 
 # Spectrogram of the cross-corr boundaries
 plt.figure()
@@ -102,38 +107,69 @@ num_channels = audio.shape[1]
 
 # %% 
 # Estimate time-difference-of-arrival across different channels and sounds
+reference_ch = 3
+
 all_tdoas = {}
 for i,each_common in enumerate(crosscor_boundaries):
     start, stop = each_common
     start_sample, stop_sample = int(start*fs), int(stop*fs)
     
-    tdoas = measure_tdoa(audio[start_sample:stop_sample,:], fs)
+    tdoas = measure_tdoa(audio[start_sample:stop_sample,:], fs, ref_channel=reference_ch)
     all_tdoas[i] = tdoas
 
 # %% 
 # Use the TDOAs to calculate positions of sound sources
+
+
 vsound = 338.0
 all_positions = []
+num_rows = mic_positions.shape[0]-1
+calculated_positions = np.zeros((num_test_positions, 3))
 for det_number, tdoas in all_tdoas.items():
     try:
-        d = vsound*tdoas.reshape(3,1)
-        pos = sr1987.schau_robinson_solution(mic_positions, d)
-        all_positions.append(pos)
+        d = vsound*tdoas
+        pos = fr87.solve_friedlander1987(mic_positions, d, j=reference_ch, 
+                                         use_analytical=False).flatten()
+        calculated_positions[det_number,:] = pos
     except:
-        print(f'Couldnt calculate for detection {det_number}')
+        print(f'COULD NOT CALCULATE POSITION FOR TEST POSITION {det_number}')
 
 # %% 
-# The point I"m stuck at here is that the SR1987 gives two solutions for any
-# set of of TDOAs, how to choose one of them without prior information. It seems
-# like you'll always need some kind of range estimate to choose the one that 
-# seems 'relevant' -- but this is exactly what you don't want to do in a situation
-# where you'd like complete automation. In their paper, Schau and Robinson
-# themselves seem to suggest this : `'In these situations, the two locations are
-# usually far enough apart that the correct solution can be discerned by other 
-# physical reasoning such as one solution lying outside the domain of interest.'`
+# Accuracy
+# --------
+# Now let's estimate the accuracy of the positions in general, in terms of their ranges
+# from the origin. 
+        
+test_ranges = np.apply_along_axis(fr87.distance_to_point, 1, test_pos, [0,0,0])
+calc_ranges = np.apply_along_axis(fr87.distance_to_point, 1, calculated_positions, [0,0,0])
+
+range_accuracy = calc_ranges/test_ranges
+
+plt.figure(figsize=(10,8))
+plt.plot(test_ranges, range_accuracy, '-*')
+plt.ylabel('Range accuracy, $\\frac{Calculated\ range}{Actual\ range}$', fontsize=12)
+plt.xlabel('Range, m', fontsize=12)
+plt.tight_layout()
+
+fig = plt.figure(figsize=(10,8))
+ax = fig.add_subplot(111, projection='3d')
+ax.view_init(elev=24, azim=16)
+ax.plot(test_pos[:,0], test_pos[:,1], test_pos[:,2],'*', label='actual')
+ax.plot(calculated_positions[:,0], calculated_positions[:,1],
+        calculated_positions[:,2],'*', label='calculated')
+
+ax.plot(mic_positions[0:2,0], mic_positions[0:2,1],
+        mic_positions[0:2,2],'g-*')
+ax.plot(mic_positions[2:4,0], mic_positions[2:4,1],
+        mic_positions[2:4,2],'g-*')
+ax.plot(mic_positions[[0,4],0], mic_positions[[0,4],1],
+        mic_positions[[0,4],2],'g-*')
+ax.plot(mic_positions[[0,3],0], mic_positions[[0,3],1],
+        mic_positions[[0,3],2],'g-*', label='Mic array')
+plt.legend()
+plt.tight_layout()
+ax.set_xlabel('X', fontsize=12);ax.set_ylabel('Y', fontsize=12); ax.set_zlabel('Z', fontsize=12)
 
 
-print(all_positions)
 
-print(test_pos)
 
