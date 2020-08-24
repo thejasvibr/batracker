@@ -24,7 +24,6 @@ from plot_correspondence_matching import generate_crosscor_boundaries
 from plot_tdoa_prototyper import measure_tdoa
 
 
-
 # %% 
 # Load the simulated audio file 
 
@@ -32,24 +31,28 @@ import tacost
 from tacost import calculate_toa as ctoa
 
 # %% 
-# Generate an array geometry and use previously made  source positions
+# Generate an array geometry and use simulated source positions
 
 mic_positions = np.array([[ 0, 0, 0],
                           [ 1, 0, 0],
                           [-1, 1, 0],
-                          [ 0, 1, 0],
+                          [ 0, 0.5, 0],
                           [ 0, 0, 1]
                        ])
 
-num_test_positions = 20
-test_pos = np.random.choice(np.arange(0,10,0.05),
-                            num_test_positions*3).reshape(-1,3)
+x = np.linspace(2,10,3)
+y = x.copy()
+z = x.copy()
+
+xyz = np.array(np.meshgrid(x,y,z)).T.reshape(-1,3)
+
+test_pos = xyz
 toa = ctoa.calculate_mic_arrival_times(test_pos,
-                                       array_geometry=mic_positions)
+                                       array_geometry=mic_positions,
+                                       intersound_interval=0.05)
 
 test_audio, fs = tacost.make_sim_audio.create_audio_for_mic_arrival_times(toa,
-                                                                     call_snr=80,
-                                                                     intersound_interval=0.025)
+                                                        call_snr=80)
 audio = test_audio.copy()
 
 # %% 
@@ -124,7 +127,7 @@ for i,each_common in enumerate(crosscor_boundaries):
 vsound = 338.0
 all_positions = []
 num_rows = mic_positions.shape[0]-1
-calculated_positions = np.zeros((num_test_positions, 3))
+calculated_positions = np.zeros((test_pos.shape[0], 3))
 for det_number, tdoas in all_tdoas.items():
     try:
         d = vsound*tdoas

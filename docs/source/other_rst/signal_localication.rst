@@ -49,5 +49,8 @@ signal localisation API
 .. automodule:: batracker.localisation.schau_robinson_1987
    :members:
 
+.. automodule:: batracker.localisation.friedlander_1987
+   :members:
+
 
 
