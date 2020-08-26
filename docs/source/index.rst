@@ -21,13 +21,18 @@ in collaborating on this repo or funding this project do send me a message at th
 
 To check out all the stuff being prototyped check it out here - I'm always happy to hear any suggestions/advice!
 
-#. 2020-08-23 : The first start-to-end example in place. Sound sources, detected, matched and localised in this example.
-
 .. toctree::
         :maxdepth:4
         :caption: `prototyping zone`
 
         prototyping/index.rst
+
+
+Implemented to date
+~~~~~~~~~~~~~~~~~~~
+
+#. 2020-08-23 : The first start-to-end example in place. Sound sources, detected, matched and localised in this example.
+#. Localisation with 4 channels when given the time-difference of arrivals 
 
 
 
@@ -96,12 +101,6 @@ all the available (independent) TDOAs or only a subset of them.
 This part of the package deals with the act of using the TDOAs and generating
 the source signal positions.
 
-
-Implemented to date
-~~~~~~~~~~~~~~~~~~~
-
-#. Localisation with 4 channels when given the time-difference of arrivals 
-#. 
 
 
 

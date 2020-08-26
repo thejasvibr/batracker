@@ -14,111 +14,146 @@ the within-channel can be set by the user, though the simplest is of course a ba
 signal goes beyond a particular threshold, a signal is considered to be in that region.
 
 
-Across-channel correspondence matching
---------------------------------------
-After having detected the signals across all channels, they now need to be matched to each other. For sensible time-difference-of-arrivals, 
-the 'correct' signal detections across channels need to be matched. In single-animal cases, where the animal emits discrete sounds with 
-large enough inter-sound intervals, this can be achieved simple by assuming all sounds within :math:`\Delta\ T` of each other are from the
-same source. However, with larger arrays, and multiple animals things can get tricky. Moreover, sometimes it may not be possible to decide the
-correspondence solely from the audio data itself, and may require the assistance of another data channel, eg. video. 
+Built-in detection routines
+---------------------------
+The detection module has a few simple detection routines. More advanced routines
+are unlikely to form a core part of the package, and need to be written by the 
+user. 
 
-The simplest case `batracker` deals with is the single animal case, where the signal correspondence problem is easily solved by checking for 
-all signals within :math:`\pm\ \DeltaT` of the focal signal.
+#. dBrms_detector : Calculates the moving dB rms profile of an audio clip. The
+User needs to define the size of the moving window and the threshold in dB rms. 
 
+#. 
 '''
 
-import scipy.signal as signal 
-import numpy as np 
+import os
+import matplotlib.pyplot as plt
+plt.rcParams['agg.path.chunksize']=10000
+import numpy as np
+import scipy.io.wavfile as wav
+import scipy.ndimage as ndimage
+import tqdm
 
+import batracker
+from batracker.common_dsp import sigproc
+from sigproc import dB, rms
 
-def detect_signal(audio,fs, **kwargs):
+def cross_channel_threshold_detector(multichannel, fs, **kwargs):
     '''
     Parameters
     ----------
-    audio  : np.array
-        Msamples x Nchannels array with the multicchannel audio.
-    fs : float>0
-        sample rate
-    signal_detector : function, optional
-        The function used to detect a signal. Defaults to the click_detector function.
-
+    multichannel : np.array
+        Msamples x Nchannels audio data
+    fs : float >0
+    detector_function : function, optional 
+        The function used to detect the start and end of a signal. 
+        Any custom detector function can be given, the compulsory inputs
+        are audio np.array, sample rate and the function should accept keyword
+        arguments (even if it doesn't use them.)
+        Defaults to dBrms_detector. 
+    
+    
     Returns
     -------
-    multichannel_candidates : List with sublists.
-        The start and stop times where the signal is in each channel. 
-        Each sublist contains the candidate signal regions for a channel.
-        Each candidate signal region is a tuple with the start and end times
-        of the signal detected in that channel.
-
-    Note
-    ----
-    The `signal_times` list can look like so 
-    [ [(0.1,0.3),(0.5,0.8),(0.9,1.2)],
-      [],
-      [(0.2,0.9), (.9,1.2), (1.23,1.26)]
-    ]
-    This implies the input audio was a 3 channel recording. 
-    The first channel showed three detections, the second channel had zero detections, 
-    and the third channel had three detections too. Note that all channels do not
-    have to have the same number of detections, and they may be different for a 
-    variety of reasons. 
-
-    By default, the simplest signal detection algorithm is chosen, the 'click-detection'
-    algorithm, where the sound is considered to start and stop as long as the 
-    waveform is above a given threshold. 
+    all_detections : list
+        A list with sublists containing start-stop times of the detections 
+        in each channel. Each sublist contains the detections in one channel.
+        
+    Notes
+    -----
+    For further keyword arguments see the `threshold_detector` function
     
     See Also
     --------
-    click_detector
-    '''
-    signal_detector = kwargs.get('signal_detector', click_detector)
+    dBrms_detector
     
-    # apply click detection on each channel
-    n_channels = audio.shape[1]
-    multichannel_candidates = []
-    for each_channel in range(n_channels):
-        channel_candidates = signal_detector(audio[:,each_channel], fs, **kwargs)
-        multichannel_candidates.append(channel_candidates)
-    return multichannel_candidates
+    '''
+    samples, channels = multichannel.shape
+    detector_function = kwargs.get('detector_function', dBrms_detector)
+    print(channels, samples)
+    all_detections = []
+    for each in tqdm.tqdm(range(channels)):
+        all_detections.append(detector_function(multichannel[:,each], fs, **kwargs))
+    return all_detections
         
 
-def click_detector(one_channel, fs, **kwargs):
-    '''
-    Any region above a given threshold is considered  valid sound, and 
-    its start and stop times are output.
 
+
+def dBrms_detector(one_channel, fs, **kwargs):
+    '''
+    Calculates the dB rms profile of the input audio and 
+    selects regions which arae above  the profile. 
+    
     Parameters
     ----------
-    one_channel : np.array
-        Audio for a single channel
-    fs : float>0
-        Samplerate
-    threshold: float, optional
-        The threshold above which a sound is considered a signal 
+    one_channel
+    fs
+    dbrms_threshold: float, optional
+        Defaults to  -50 dB rms
+    dbrms_window: float, optional
+        The window which is used to calculate the dB rms profile
+        in seconds.  Defaults to 0.001 seconds.
     
     Returns
     -------
-    candidate_regions : list with tuples
-        Each tuple consists of two floats with the 
-        start and stop time of the candidate signal region
-
+    detections : list with tuples
+        Each tuple corresponds to a candidate signal region
     '''
-    threshold = kwargs.get('threshold', -20) # dB rms / PEAKS -DECIDE
+    if one_channel.ndim > 1:
+        raise IndexError(f'Input audio must be flattened, and have only 1 dimension. \
+                         Current audio has {one_channel.ndim} dimensions')
+    dbrms_window = kwargs.get('dbrms_window',0.001) # seconds
+    dbrms_threshold = kwargs.get('dbrms_threshold', -50)
     
-    # Generate a moving rms or some kind of other sound profile ? -- 
-    # Perhaps also a Hilbert transform envelope? 
+    window_samples = int(fs*dbrms_window)
+    dBrms_profile = dB(moving_rms(one_channel, window_size=window_samples))
     
+    labelled, num_regions = ndimage.label(dBrms_profile>dbrms_threshold)
+    if num_regions==0:
+        raise ValueError(f'No regions above threshold: {dbrms_threshold} dBrms found in this channel!')
+    regions_above = ndimage.find_objects(labelled.flatten())
+    regions_above_timestamps = [get_start_stop_times(each, fs) for each in regions_above]
     
-    # Use scipy.ndimage.find_objects to get all continuous stretches of 
-    # signal above the threshold 
+    return regions_above_timestamps
     
-    # reformat the ndimage tuples and return them.
+def get_start_stop_times(findobjects_tuple, fs):
+    '''
     
-    
-    
+    '''
+    only_tuple = findobjects_tuple[0]
+    start, stop = only_tuple.start/fs, only_tuple.stop/fs
+    return start, stop
 
 
+def moving_rms(X, **kwargs):
+    '''Calculates moving rms of a signal with given window size. 
+    Outputs np.array of *same* size as X. The rms of the 
+    last few samples <= window_size away from the end are assigned
+    to last full-window rms calculated
+    Parameters
+    ----------
+    X :  np.array
+        Signal of interest. 
+    window_size : int, optional
+                 Defaults to 125 samples. 
+    Returns
+    -------
+    all_rms : np.array
+        Moving rms of the signal. 
+    '''
+    window_size = kwargs.get('window_size', 125)
+    starts = np.arange(0, X.size)
+    stops = starts+window_size
+    valid = stops<X.size
+    valid_starts = np.int32(starts[valid])
+    valid_stops = np.int32(stops[valid])
+    all_rms = np.ones(X.size).reshape(-1,1)*999
 
+    for i, (start, stop) in enumerate(zip(valid_starts, valid_stops)):
+        rms_value = rms(X[start:stop])
+        all_rms[i] = rms_value
+    
+    # replace all un-assigned samples with the last rms value
+    all_rms[all_rms==999] = np.nan
 
-
-
+    return all_rms
