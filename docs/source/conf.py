@@ -36,7 +36,7 @@ extensions = ['sphinx.ext.autodoc','sphinx.ext.napoleon',
 
 # The directories that sphinx-gallery will work to render
 sphinx_gallery_conf = {
-     'examples_dirs': ['../../batracker/tests/prototyping/','../../batracker/examples/'],   # path to your example scripts
+     'examples_dirs': ['../../batracker/tests/prototyping/','../../examples/'],   # path to your example scripts
      'gallery_dirs': ['prototyping', 'examples'],  # path to where to save gallery generated output,
      'image_scrapers': ('matplotlib'),
 }

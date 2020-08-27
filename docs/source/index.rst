@@ -23,9 +23,13 @@ To check out all the stuff being prototyped check it out here - I'm always happy
 
 .. toctree::
         :maxdepth:4
-        :caption: `prototyping zone`
+        :caption: prototyping zone
 
         prototyping/index.rst
+
+Head here to check out the current ideas and example implementations 
+being tried out in `batracker`
+
 
 
 Implemented to date
@@ -53,11 +57,15 @@ I describe here a few open-source packages which may be of interest and fill sim
 
 
 .. toctree::
-        :maxdepth:4
-        :caption: Examples!
+        :maxdepth: 2
+        :caption: Guide-throughs
 
         examples/index.rst
 
+The example galleries above will help you understand the basic concepts and parameters used in various parts of the `batracker` package.
+
+batracker API
+-------------
 
 Signal detection
 ~~~~~~~~~~~~~~~~

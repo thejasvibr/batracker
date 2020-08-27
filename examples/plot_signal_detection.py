@@ -20,7 +20,6 @@ Inbuilt Signal Detection Routines
 This example will go on to showcase how signal detection works using these two
 routines.
 
-
 """
 
 
