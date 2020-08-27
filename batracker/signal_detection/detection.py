@@ -23,20 +23,22 @@ user.
 #. dBrms_detector : Calculates the moving dB rms profile of an audio clip. The
 User needs to define the size of the moving window and the threshold in dB rms. 
 
-#. 
+#. envelope_detector : Generates the Hilbert envelop of the audio clip. Regions above
+the set threshold in dB peak amplitude are defined as detections. This method is faster
+than the dBrms_detector.
 '''
 
 import os
 import matplotlib.pyplot as plt
 plt.rcParams['agg.path.chunksize']=10000
 import numpy as np
+import scipy.signal as signal
 import scipy.io.wavfile as wav
 import scipy.ndimage as ndimage
 import tqdm
 
-import batracker
-from batracker.common_dsp import sigproc
-from sigproc import dB, rms
+from batracker.common_dsp.sigproc import *
+
 
 def cross_channel_threshold_detector(multichannel, fs, **kwargs):
     '''
@@ -115,7 +117,43 @@ def dBrms_detector(one_channel, fs, **kwargs):
     regions_above_timestamps = [get_start_stop_times(each, fs) for each in regions_above]
     
     return regions_above_timestamps
+
+
+def envelope_detector(audio, fs, **kwargs):
+    '''
+    Generates the Hilbert envelope of the audio. Signals are detected
+    wherever the envelope goes beyond a user-defined threshold value.
     
+    Parmeters
+    ---------
+    audio
+    fs
+    threshold_dbpeak : float
+        The value beyond which a signal is considered to start.
+        
+    Returns
+    -------
+    regions_above_timestamps 
+    
+    TODO
+    ----
+    The Hilbert envelope can be a bit rough for some calls recordings, maybe think
+    of adding the option of smoothing the envelope to generate fewer false positive
+    detections?
+    
+    '''
+    envelope = np.abs(signal.hilbert(audio))
+    
+    # get regions above the 
+    threshold_db = kwargs['threshold_dbpeak']
+    linear_threshold = 10**(threshold_db/20)
+    labelled, num_detections = ndimage.label(envelope>=linear_threshold)
+    regions_above = ndimage.find_objects(labelled.flatten())
+    regions_above_timestamps = [get_start_stop_times(each, fs) for each in regions_above]
+    return regions_above_timestamps
+
+
+ 
 def get_start_stop_times(findobjects_tuple, fs):
     '''
     
@@ -157,3 +195,26 @@ def moving_rms(X, **kwargs):
     all_rms[all_rms==999] = np.nan
 
     return all_rms
+#    
+#if __name__ == '__main__':
+#    import scipy.signal as signal 
+#    # trying out  the hilbert envelope method:
+#    fs = 250000
+#    background = -60 # dB rms
+#    audio = np.random.normal(0, 10**(background/20), fs)
+#    duration = 0.005
+#    sound_start = 0.05
+#    t = np.linspace(0, duration, int(fs*duration))
+#    bat_call = signal.chirp(t,90000, 25000, t[-1])
+#    bat_call *= 0.5
+#    sound_stop = sound_start+duration
+#    
+#    start, end = np.int32(np.array([sound_start,
+#                                    sound_stop])*fs)
+#    audio[start:end] += bat_call
+#    
+#    envelope = np.abs(signal.hilbert(audio))
+#    
+#    dets = envelope_detector(audio, fs, threshold_dbpeak=-20)
+#    print(dets)
+##        

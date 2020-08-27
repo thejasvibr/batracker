@@ -52,6 +52,13 @@ I describe here a few open-source packages which may be of interest and fill sim
 #. `Sound Finder <https://www.tandfonline.com/doi/abs/10.1080/09524622.2013.827588>`_
 
 
+.. toctree::
+        :maxdepth:4
+        :caption: Examples!
+
+        examples/index.rst
+
+
 Signal detection
 ~~~~~~~~~~~~~~~~
 
