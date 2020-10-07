@@ -1,5 +1,5 @@
-Signal detection (Detailed)
-===========================
+Signal detection
+================
 In this package, signal detection refers to the general act of 1)'recognising' the signal of interest within a given channel. 
 
 Expected Inputs
@@ -51,3 +51,14 @@ Less simple methods
 ~~~~~~~~~~~~~~~~~~~
 Threshold based methods could lead to false positives, where there are similar non-target sounds in the same 
 frequency range (eg. two species calling at the same time). Here there are a bunch of options
+
+
+
+Signal Detection API
+--------------------
+
+.. automodule:: batracker.signal_detection.detection
+   :members:
+
+
+

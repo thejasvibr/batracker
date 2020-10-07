@@ -27,9 +27,9 @@ with the original simulated positions.
     import numpy as np 
     import pandas as pd
     import scipy.io.wavfile as wavfile
-    from plot_threshold_detector import cross_channel_threshold_detector
-    from plot_correspondence_matching import generate_crosscor_boundaries
-    from plot_tdoa_prototyper import measure_tdoa
+    from batracker.signal_detection import detection
+    from batracker.correspondence import matching
+    from batracker.tdoa_estimation import tdoa_estimators
 
 
 
@@ -95,7 +95,7 @@ Detect the calls in each channel
 
 .. code-block:: default
 
-    detections = cross_channel_threshold_detector(audio, fs,
+    detections = detection.cross_channel_threshold_detector(audio, fs,
                                                   dbrms_window=0.5*10**-3,
                                                   dbrms_threshold=-60)
 
@@ -154,7 +154,7 @@ Detect the calls in each channel
  .. code-block:: none
 
     5 725707
-      0%|          | 0/5 [00:00<?, ?it/s]     20%|##        | 1/5 [00:14<00:59, 14.80s/it]     40%|####      | 2/5 [00:29<00:44, 14.91s/it]     60%|######    | 3/5 [00:44<00:29, 14.93s/it]     80%|########  | 4/5 [01:00<00:15, 15.00s/it]    100%|##########| 5/5 [01:15<00:00, 14.99s/it]    100%|##########| 5/5 [01:15<00:00, 15.01s/it]
+      0%|          | 0/5 [00:00<?, ?it/s]     20%|##        | 1/5 [00:15<01:02, 15.52s/it]     40%|####      | 2/5 [00:30<00:46, 15.34s/it]     60%|######    | 3/5 [00:45<00:30, 15.15s/it]     80%|########  | 4/5 [00:59<00:14, 14.92s/it]    100%|##########| 5/5 [01:14<00:00, 15.06s/it]    100%|##########| 5/5 [01:14<00:00, 14.98s/it]
 
 
 
@@ -174,7 +174,7 @@ inter-mic delays
     ag = pd.DataFrame(mic_positions)
     ag.columns  = ['x','y','z']
 
-    crosscor_boundaries = generate_crosscor_boundaries(detections, ag)
+    crosscor_boundaries = matching.match_by_max_distance(detections, ag)
 
     num_channels = audio.shape[1]
 
@@ -198,7 +198,7 @@ Estimate time-difference-of-arrival across different channels and sounds
         start, stop = each_common
         start_sample, stop_sample = int(start*fs), int(stop*fs)
     
-        tdoas = measure_tdoa(audio[start_sample:stop_sample,:], fs, ref_channel=reference_ch)
+        tdoas = tdoa_estimators.measure_tdoa(audio[start_sample:stop_sample,:], fs, ref_channel=reference_ch)
         all_tdoas[i] = tdoas
 
 
@@ -320,7 +320,7 @@ from the origin.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  19.751 seconds)
+   **Total running time of the script:** ( 1 minutes  19.111 seconds)
 
 
 .. _sphx_glr_download_prototyping_plot_start_to_end.py:

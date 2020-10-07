@@ -1,5 +1,5 @@
-Correspondence matching (Detailed)
-==================================
+Correspondence matching 
+=======================
 
 
 Identifying each candidate signal: final outputs
@@ -97,6 +97,17 @@ Possible solutions
 #. Spectrogram cross-correlation?
 
 #. Stereo image matching : Try and use established algorithms from image analysis/ structure-from-motion/etc. to generate matches across the different calls and channels using spectrogram representations. One of the issues is that these matching algorithms are built with rotational invariance in mind  -- which might mess things up.
+
+
+
+Correspondence matching API
+---------------------------
+
+.. automodule:: batracker.correspondence.matching
+   :members:
+
+
+
 
 
 

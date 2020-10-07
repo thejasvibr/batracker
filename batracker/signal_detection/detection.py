@@ -1,7 +1,4 @@
 '''
-Detection API
-=============
-
 Deals with the actual detection of signals in multichannel audio files. 
 There are two problems that need to solved while detecting a signal of interest.
     #. within-channel signal detection
@@ -28,7 +25,6 @@ the set threshold in dB peak amplitude are defined as detections. This method is
 than the dBrms_detector.
 '''
 
-import os
 import matplotlib.pyplot as plt
 plt.rcParams['agg.path.chunksize']=10000
 import numpy as np
@@ -112,7 +108,7 @@ def dBrms_detector(one_channel, fs, **kwargs):
     
     labelled, num_regions = ndimage.label(dBrms_profile>dbrms_threshold)
     if num_regions==0:
-        raise ValueError(f'No regions above threshold: {dbrms_threshold} dBrms found in this channel!')
+        print (f'No regions above threshold: {dbrms_threshold} dBrms found in this channel!')
     regions_above = ndimage.find_objects(labelled.flatten())
     regions_above_timestamps = [get_start_stop_times(each, fs) for each in regions_above]
     

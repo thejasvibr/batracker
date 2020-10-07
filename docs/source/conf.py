@@ -41,6 +41,8 @@ sphinx_gallery_conf = {
      'image_scrapers': ('matplotlib'),
 }
 
+# make sure the docs display functions docstrings in the same order they are in the module 
+autodoc_member_order = 'bysource'
 
 
 # Add any paths that contain templates here, relative to this directory.

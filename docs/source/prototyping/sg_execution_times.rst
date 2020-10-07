@@ -5,10 +5,10 @@
 
 Computation times
 =================
-**01:19.751** total execution time for **prototyping** files:
+**01:19.111** total execution time for **prototyping** files:
 
 +---------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_prototyping_plot_start_to_end.py` (``plot_start_to_end.py``)                                   | 01:19.751 | 0.0 MB |
+| :ref:`sphx_glr_prototyping_plot_start_to_end.py` (``plot_start_to_end.py``)                                   | 01:19.111 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------------------+-----------+--------+
 | :ref:`sphx_glr_prototyping_implementing_frielander1987.py` (``implementing_frielander1987.py``)               | 00:00.000 | 0.0 MB |
 +---------------------------------------------------------------------------------------------------------------+-----------+--------+

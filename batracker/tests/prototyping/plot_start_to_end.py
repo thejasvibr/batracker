@@ -19,9 +19,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np 
 import pandas as pd
 import scipy.io.wavfile as wavfile
-from plot_threshold_detector import cross_channel_threshold_detector
-from plot_correspondence_matching import generate_crosscor_boundaries
-from plot_tdoa_prototyper import measure_tdoa
+from batracker.signal_detection import detection
+from batracker.correspondence import matching
+from batracker.tdoa_estimation import tdoa_estimators
 
 
 # %% 
@@ -57,7 +57,7 @@ audio = test_audio.copy()
 
 # %% 
 # Detect the calls in each channel 
-detections = cross_channel_threshold_detector(audio, fs,
+detections = detection.cross_channel_threshold_detector(audio, fs,
                                               dbrms_window=0.5*10**-3,
                                               dbrms_threshold=-60)
 
@@ -103,7 +103,7 @@ for i in range(2,5):
 ag = pd.DataFrame(mic_positions)
 ag.columns  = ['x','y','z']
 
-crosscor_boundaries = generate_crosscor_boundaries(detections, ag)
+crosscor_boundaries = matching.match_by_max_distance(detections, ag)
 
 num_channels = audio.shape[1]
 
@@ -117,7 +117,7 @@ for i,each_common in enumerate(crosscor_boundaries):
     start, stop = each_common
     start_sample, stop_sample = int(start*fs), int(stop*fs)
     
-    tdoas = measure_tdoa(audio[start_sample:stop_sample,:], fs, ref_channel=reference_ch)
+    tdoas = tdoa_estimators.measure_tdoa(audio[start_sample:stop_sample,:], fs, ref_channel=reference_ch)
     all_tdoas[i] = tdoas
 
 # %% 

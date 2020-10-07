@@ -5,7 +5,7 @@ from batracker.signal_detection.detection import *
 
 
 def check_num_detections(detections, exp_num_detections):
-    '''
+    '''Internal test function to check the number of detections.
     '''
     obtained_detections = len(detections)
     if obtained_detections!=exp_num_detections:
