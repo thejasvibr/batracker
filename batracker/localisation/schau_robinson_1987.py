@@ -101,7 +101,10 @@ def parse_for_equation13(M, d, Delta):
     check_array_shape(d, (3,1))
     check_array_shape(Delta, (3,1))
     
-    M_inv = np.linalg.inv(M)
+    try:
+        M_inv = np.linalg.inv(M)
+    except:
+        M_inv = np.linalg.pinv(M)
     Minv_transp_into_Minv = (M_inv.T).dot(M_inv)
     
     a = 4 - 4*(d.T).dot(Minv_transp_into_Minv.dot(d))
@@ -183,7 +186,10 @@ def equation_10(M, Delta, Rs, d):
     are relevant for the situation.   
     
     '''
-    M_inv = np.linalg.inv(M)
+    try:
+        M_inv = np.linalg.inv(M)
+    except:
+        M_inv = np.linalg.pinv(M)
     X_1 = 0.5*M_inv.dot(Delta-2*Rs[0]*d)
     X_2 = 00.5*M_inv.dot(Delta-2*Rs[1]*d)
     return X_1, X_2

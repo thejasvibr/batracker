@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 import scipy.io.wavfile as wavfile
 from batracker.signal_detection import detection
-from batracker.correspondence import matching
+from batracker.correspondence_matching import multichannel_match as matching
 from batracker.tdoa_estimation import tdoa_estimators
 
 
@@ -37,7 +37,7 @@ mic_positions = np.array([[ 0, 0, 0],
                           [ 1, 0, 0],
                           [-1, 1, 0],
                           [ 0, 0.5, 0],
-                          [ 0, 0, 1]
+                          [-2,2,1]
                        ])
 
 x = np.linspace(2,10,3)
@@ -103,7 +103,7 @@ for i in range(2,5):
 ag = pd.DataFrame(mic_positions)
 ag.columns  = ['x','y','z']
 
-crosscor_boundaries = matching.match_by_max_distance(detections, ag)
+crosscor_boundaries = matching.generate_crosscor_boundaries(detections, ag)
 
 num_channels = audio.shape[1]
 

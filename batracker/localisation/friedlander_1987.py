@@ -51,7 +51,6 @@ def solve_friedlander1987(array_geometry, d, **kwargs):
         used to find the source position. The difference is likely to be 
         negligible for most cases.
         
-    
     Returns
     -------
     x_real_world : list
@@ -64,8 +63,10 @@ def solve_friedlander1987(array_geometry, d, **kwargs):
     j = kwargs['j']
     
     num_channels, coods = array_geometry.shape
-    if num_channels == 4:
-        raise NotImplementedError('Friedlander 1987 algorithm not yet implemented for 4 channels! Please raise issue or submit a pull request:)!')
+    if num_channels <= 4:
+        raise IndexError(f'Friedlander 1987 supports only >4 mics for a 3d localisation.\
+                         The input audio has {num_channels} mics')
+
     
     if coods != 3:
         raise IndexError(f'The current array geometry is {coods} dimensional.Only 3d coordinates accepted')

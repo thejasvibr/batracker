@@ -120,32 +120,55 @@ def envelope_detector(audio, fs, **kwargs):
     Generates the Hilbert envelope of the audio. Signals are detected
     wherever the envelope goes beyond a user-defined threshold value.
     
-    Parmeters
-    ---------
+    Two main options are to segment loud signals with reference to dB peak or 
+    with reference dB above floor level. 
+    
+    Parameters
+    ----------
     audio
     fs
-    threshold_dbpeak : float
+    
+    
+    Keyword Arguments
+    -----------------
+    threshold_db_floor: float, optional
+        The threshold for signal detection in dB above the floor level. The 5%ile level of the whole envelope is chosen as
+        the floor level. If not specified, then threshold_dbpeak is used to segment signals.
+    threshold_dbpeak : float, optional
         The value beyond which a signal is considered to start.
-        
+        Used only if relative_to_baseline is True.
+    lowpass_durn: float, optional
+        The highest time-resolution of envelope fluctuation to keep. 
+        This effectively performs a low-pass at 1/lowpass_durn Hz on the raw envelope
+        signal. 
+    
+
     Returns
     -------
     regions_above_timestamps 
     
-    TODO
-    ----
-    The Hilbert envelope can be a bit rough for some calls recordings, maybe think
-    of adding the option of smoothing the envelope to generate fewer false positive
-    detections?
+    
     
     '''
     envelope = np.abs(signal.hilbert(audio))
     
-    # get regions above the 
-    threshold_db = kwargs['threshold_dbpeak']
+    
+    if not kwargs.get('lowpass_durn') is None:
+        lowpass_durn = kwargs['lowpass_durn'] # seconds
+        freq = 1.0/lowpass_durn
+        b,a = signal.butter(2, freq/(fs*0.5),'lowpass')
+        envelope = signal.filtfilt(b,a,envelope)
+    
+    if not kwargs.get('threshold_db_floor', None) is None:
+        floor_level = np.percentile(20*np.log10(envelope),5)
+        threshold_db = floor_level + kwargs['threshold_db_floor']
+    else:
+        # get regions above the threshold
+        threshold_db = kwargs['threshold_dbpeak']
     linear_threshold = 10**(threshold_db/20)
     labelled, num_detections = ndimage.label(envelope>=linear_threshold)
     regions_above = ndimage.find_objects(labelled.flatten())
-    regions_above_timestamps = [get_start_stop_times(each, fs) for each in regions_above]
+    regions_above_timestamps = [get_start_stop_times(each, fs   ) for each in regions_above]
     return regions_above_timestamps
 
 

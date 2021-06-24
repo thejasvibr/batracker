@@ -2,8 +2,8 @@
 Module that implements various ways to match sounds detected in one channel to 
 sounds detected in other channels. 
 '''
-
-from batracker.signal_detection.detection import cross_channel_threshold_detector
+from scipy import spatial
+import numpy as np 
 
 def calc_intermic_distances(array_geom):
         '''
