@@ -53,6 +53,21 @@ def schau_robinson_solution(array_geometry, d):
         A list with 2 3x1 np.arrays with the x,y,z positions of the source.
         The two xyz positions describe two possible solutions to the given 
         array geometry and range differences.
+    
+    Attention
+    ---------
+    The Schau-Robinson algorithm does not work consistently for microphone arrays
+    that have mics in the same plane (eg. 'flat' arrays with a common y coordinate)
+
+    For example, when using the Schau-Robinson on the flat tristar array [1]- all sources
+    always have a faulty 0 'y' coordinate.
+    
+    References
+    ----------   
+    
+    1. Goerlitz, H.R. (2019, October 25). TOADSuite Manual. Zenodo. http://doi.org/10.5281/zenodo.3518761
+
+    
     '''
     ref_microphone_position = array_geometry[-1,:]
     array_geom_refm4 = array_geometry-ref_microphone_position
@@ -74,8 +89,7 @@ def schau_robinson_solution(array_geometry, d):
     
     return x_real_world
     
-
-    
+  
     
     
 
