@@ -18,10 +18,6 @@ References
 [1] Friedlander, B. (1987). A passive localization algorithm and its accuracy analysis.
     IEEE Journal of Oceanic engineering, 12(1), 234-245.
 
-TODO:
-    
-    #. Run tests with simulated data and check accuracy
-
 """
 import numpy as np 
 import scipy.spatial.distance as distance

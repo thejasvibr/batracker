@@ -7,28 +7,13 @@ Localising sounds with the  Schau & Robinson 1987 algorithm
 The Schau & Robinson algorithm formulates the localisatin problem into finding
 a series of intersecting spheres, instead of hyperbolas. This also means that 
 there are two possible solutions to the localisation. The user will need to choose
-the relevant option. 
-
-The input variables
--------------------
-The Schau & Robinson paper defines a bunch of input variables:
-    #. :math:`M`
-    #. :math:`d`
-    #. :math:`x`
-    #. :math:`\Delta`  , where :math:`\Delta` itself is a matrix with
-       :math:`{R_{i}}^2 - {d_{i4}}^2`. :math:`R_{i}` is the distance from 
-       mic `i` to the origin (mic 4), and :math:`d_{i4}` is the range
-       difference to the source between mic `i` and mic 4 (Eqn. 1), :math:`d_{i4}=D_{i}-D_{4}`
-
+the relevant option.
 
 References
 ----------
 
 [1] Schau, H. C., & Robinson, A. Z. (1987). Passive source localization employing intersecting spherical surfaces from time-of-arrival differences.
 IEEE Transactions on Acoustics, Speech, and Signal Processing, 35(8), 1223-1225.
-
-TODO:
-    #. run tests with a simulation and then check if the answers are correct or not!
 
 """
 import numpy as np
@@ -69,6 +54,11 @@ def schau_robinson_solution(array_geometry, d):
 
     
     '''
+    #check shape of array geometry
+    n_mics = array_geometry.shape[0]
+    if n_mics != 4:
+        raise ValueError(f'Schau Robinson 1987 only solves for 4 receivers. {n_mics} receiver array given.')
+
     ref_microphone_position = array_geometry[-1,:]
     array_geom_refm4 = array_geometry-ref_microphone_position
     M = array_geom_refm4[:-1,:] # a 3x3 matrix
@@ -88,9 +78,6 @@ def schau_robinson_solution(array_geometry, d):
     x_real_world = [each.flatten() + ref_microphone_position for each in x]
     
     return x_real_world
-    
-  
-    
     
 
 def parse_for_equation13(M, d, Delta):

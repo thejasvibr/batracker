@@ -29,7 +29,7 @@ def spiesberger_wahlberg_solution(array_geometry, d, **kwargs):
     Parameters
     ----------
     array_geometry: np.array
-        A 4x3 array with xyz coordinates of 4 mics.
+        A 4x3 array with xyz coordinates of >= 4 mics.
         The first mic will be taken as the reference microphone.
     d:  np.array
         A 3x1 np.array with the range_differences to the source. 
@@ -44,9 +44,22 @@ def spiesberger_wahlberg_solution(array_geometry, d, **kwargs):
         The two xyz positions describe two possible solutions to the given 
         array geometry and range differences.
     
+    Notes
+    -----
+    The first mic in this formulation must be the origin (0,0,0). If array_geometry
+    doesn't have the first mic's position as 0,0,0 - this is taken care of using 
+    relative subtraction and addition. 
+
     '''
     c = kwargs.get('c', 338.0) # m/s
-    
+    # check that the 1st mic is origin - else set it to 0,0,0
+    if not np.array_equal(array_geometry[0,:], np.array([0,0,0])):
+        mic1_notorigin = True
+        mic1 = array_geometry[0,:]
+        array_geometry = array_geometry - mic1
+    else:
+        mic1_notorigin = False
+        
     # the receiver matrix- excluding the first channel.
     R = array_geometry[1:,:]
     tau = d.copy()/c # to keep symbol conventions the same
@@ -86,6 +99,9 @@ def spiesberger_wahlberg_solution(array_geometry, d, **kwargs):
     
     s = [matmul(R_inv,b*0.5) - matmul(R_inv,f)*t1[0],
          matmul(R_inv,b*0.5) - matmul(R_inv,f)*t1[1]]
+    if mic1_notorigin:
+        for each in s:
+            each += mic1
     return s
 
 if __name__ == '__main__':
