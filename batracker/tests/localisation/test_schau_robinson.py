@@ -41,8 +41,14 @@ class SimpleTest(unittest.TestCase):
     def test_simple(self):
         
         output_positions = sr1987.schau_robinson_solution(self.array_geom, self.d)
-        print(self.source_position, output_positions)
-
+        num_matches = []
+        
+        for each in output_positions:
+                num_matches.append(np.allclose(self.source_position, each))
+        
+        self.assertEqual(sum(num_matches), 1)
+        
+        
 
 if __name__ == '__main__':
     unittest.main()
