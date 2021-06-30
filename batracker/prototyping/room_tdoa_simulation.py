@@ -11,7 +11,7 @@ import soundfile as sf
 
 # an chirp  20 ms long
 fs = 192000
-durn = 0.02
+durn = 0.010
 t = np.linspace(0, durn, int(fs*durn))
 chirp = signal.chirp(t, 90000, t[-1], 25000)
 chirp *= signal.hanning(chirp.size)
@@ -23,27 +23,39 @@ room_dims = [7,5,5] #m
 room = pra.ShoeBox(room_dims, fs, max_order=2)
 
 # mic positions - on the room wall
-R = 1.2
-theta = np.pi/3
-tristar_geom = np.column_stack(([0,0,0],
-                        [-R*np.sin(theta),0, -R*np.cos(theta)],
-                        [R*np.sin(theta), 0, -R*np.cos(theta)],
-                        [0,0,R]))
-tristar_geom [-1,:] += 2.0
-tristar_geom[1,:] += 0.3 # move the array a bit front of the wall
+
+def make_tristar_geom():
+
+    R = 1.2
+    theta = np.pi/3
+    tristar_geom = np.column_stack(([0,0,0],
+                            [-R*np.sin(theta),0, -R*np.cos(theta)],
+                            [R*np.sin(theta), 0, -R*np.cos(theta)],
+                            [0,0,R]))
+    tristar_geom [-1,:] += 2.0
+    tristar_geom [0,:] += 2.0
+    tristar_geom[1,:] += 0.3 # move the array a bit front of the wall
+    # add small amount of jitter
+    tristar_geom[1,:] += np.array([1e-5, 0.5*1e-5, 0.65e-5, 0.8e-5])
+    return tristar_geom
+tristar_geom = make_tristar_geom()
 room.add_microphone_array(tristar_geom)
 
 
 # sources
-x = [2, 2.5,  2.2, 1.5]
-y = [4.2, 4.1, 4.0, 3.95]
-z = [3, 3.5, 3.7, 3 ]
+def make_source_positions():
+    n_pbks = 20
+    x = np.linspace(1.5,4.5,n_pbks)
+    y = np.linspace(4,2,n_pbks)
+    z = np.sin(2*np.pi*20*np.linspace(0,1,n_pbks))+1.5
+    
+    source_positions = np.column_stack((x,y,z))
+    return source_positions
 
-source_positions = np.column_stack((x,y,z))
+source_positions = make_source_positions()
 
-room.add_source(source_positions[0,:], signal=chirp)
-room.add_source(source_positions[1,:], signal=chirp, delay=0.2)
-room.add_source(source_positions[2,:], signal=chirp, delay=0.3)
+for each in range(source_positions.shape[0]):
+    room.add_source(source_positions[each,:], signal=chirp, delay=each*0.07)
 
 # simulate sound propagation 
 room.simulate()

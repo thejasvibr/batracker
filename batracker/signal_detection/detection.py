@@ -156,7 +156,7 @@ def envelope_detector(audio, fs, **kwargs):
     if not kwargs.get('lowpass_durn') is None:
         lowpass_durn = kwargs['lowpass_durn'] # seconds
         freq = 1.0/lowpass_durn
-        b,a = signal.butter(2, freq/(fs*0.5),'lowpass')
+        b,a = signal.butter(1, freq/(fs*0.5),'lowpass')
         envelope = signal.filtfilt(b,a,envelope)
     
     if not kwargs.get('threshold_db_floor', None) is None:
