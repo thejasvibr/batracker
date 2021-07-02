@@ -81,7 +81,7 @@ for i,each in enumerate(audio_segments):
     tdes_m02.append(estimate_gcc(each[:,2], each[:,0]))
     tdes_m03.append(estimate_gcc(each[:,3], each[:,0]))
 
-num_peaks = 10
+num_peaks = 20
 
 tde_peaks_m01 = [pick_top_peaks(tdes_m01[each], num_peaks) for each in range(len(tdes_m01))]
 tde_peaks_m02 = [pick_top_peaks(tdes_m02[each], num_peaks) for each in range(len(tdes_m02))]
@@ -109,7 +109,7 @@ tde_peaks_m03_time = [(each- tdes_m03[i].size/2.0)/fs for i,each in enumerate(td
 # N channels? Is there some way we can figure out which ones are 'true' positions? Here we have 64 potential
 # localisations!!! 
 
-position_number = 5
+position_number = 9
 all_potential_tdes = [ each[position_number] for each in [tde_peaks_m01_time,tde_peaks_m02_time,tde_peaks_m03_time]]
 
 potential_tdoas = []
@@ -166,9 +166,157 @@ af1.plot(closest_match[0], closest_match[1], closest_match[2],'r^')
 
 print(f'calculated {candidate_positions[index,:]}, \n actual:{source_positions[position_number,:]} \n error:{abs_euc[index]}')
 
-#%% How to choose the correct candidate position?
+#%%
+# How to choose the correct candidate position?
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 # My thoughts right now are around seeing if each candidate position predicts the 
 # TOA for each channel properly. My intuition tells me the 'correct' position will
 # minimise the TOA for all channels - as it tells us the most direct path taken.
 # So the idea would be to calculate the TOAs for all candidate positions - and see which one 
 # creates the lowest TOAs for all channels. 
+
+
+#%%
+#  Option 1: Using existing range information 
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# The video tracking will provide approx.distances to m0,1,2,3 and this should 
+# allow us to filter out many of the candidate localisations.
+
+# calculate distance from sound to source from another sensor 
+candidate_distance_matrix = spatial.distance_matrix(mic_positions.T, candidate_positions)
+observed_distance_matrix = spatial.distance_matrix(mic_positions.T,source_positions)
+observed_mic_distances = observed_distance_matrix[:,position_number]
+
+
+# Now filter out all candidates that are within +/- some range of the observed 
+range_allowance = 0.3
+
+refined_candidate_indices = []
+for candidate in range(candidate_distance_matrix.shape[1]):
+    range_diff = np.abs(candidate_distance_matrix[:,candidate] - observed_mic_distances)
+    if np.max(range_diff) <= range_allowance:
+        refined_candidate_indices.append(candidate)
+
+refined_candidate_positions = candidate_positions[refined_candidate_indices,:]
+
+print(refined_candidate_positions)
+
+#%% 
+# If there are > 1 refiend candidates, then move to next step and see which ones
+# provide the best matching TDE's based on signal onset times? 
+
+
+#%% 
+# Option 2: Use signal onset times
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# The GCC or cross-correlation based TDE generally works when there isn't too much 
+# reverberance. When reverberance is there - it biases the TDE's. What if we look
+# at the onset times instead? The direct path in each channel will have the first TOA, 
+# and thus the closest TDE to the direct path. Even if we can't do this too well, 
+# we can still use these estimates to eliminate a bunch of candidates? 
+# In general- the onset of a sound is better estimated than the offset when sounds 
+# aren't overlapping - so that's one advantage. 
+
+source_audio = audio_segments[position_number]
+
+plt.figure()
+a0 = plt.subplot(411)
+plt.specgram(source_audio[:,0], Fs=fs, NFFT=256)
+for i in range(1,4):
+    plt.subplot(411+i, sharex=a0, sharey=a0)
+    plt.specgram(source_audio[:,i], Fs=fs, NFFT=256)
+
+#%% 
+# Bandpass audio from 0.25-0.5XFS as the higher frequencies tend to be lesss
+# affected by reverb. 
+
+b_up, a_up = signal.butter(1, np.array([fs*0.01, fs*0.45])/(fs*0.5), 'bandpass')
+bp_sourceaudio = np.apply_along_axis(lambda X: signal.filtfilt(b_up, a_up, X),
+                                                         0, source_audio)
+
+# get the hilbert envelope for all channels:
+envelope_audio = np.apply_along_axis(lambda X: np.abs(signal.hilbert(X)), 
+                                                         0, bp_sourceaudio)
+
+min_fluctuation = 1e-4
+b_env, a_env = signal.butter(1, (min_fluctuation**-1)/(fs*0.5), 'lowpass')
+
+lp_envelope_audio = np.apply_along_axis(lambda X: signal.filtfilt(b_env, a_env, X),
+                                        0, envelope_audio)
+
+plt.figure()
+a2 = plt.subplot(411)
+plt.plot(lp_envelope_audio[:,0])
+for i in range(1,4):
+    plt.subplot(411+i, sharex=a2, sharey=a2)
+    plt.plot(lp_envelope_audio[:,i])
+
+#%%
+# now perform onset detection on each channel: in real data this might actually be
+# rather tricky! Need to somehow weight each channel's reliability based on how the 
+# envelope fluctuates or perhaps even use a notch filter to actually get the 
+# onset of one narrow frequency band? 
+def calc_threshold(X, thresh_db):
+    silence = np.percentile(X, 10)
+    thresh = dB(silence) +  thresh_db
+    thresh_linear = 10**(thresh/20.0)
+    return thresh_linear
+
+def get_onset(X, thresh_db=10):
+    '''
+    '''
+    thresh_linear = calc_threshold(X, thresh_db)
+    return np.argwhere(X>thresh_linear).flatten()[0]
+    
+# the threshold makes a 'huge' difference in the TDOAs here --!!! 
+# need to perform some kind of multi-thresholding to form a saturation curve
+# AND also apply this to different frequency bands? 
+thresh = 50
+above_threshold = np.apply_along_axis(get_onset, 0, lp_envelope_audio,thresh)
+onset_abovethreshold = above_threshold/fs
+tdoas_relm0 = onset_abovethreshold[1:] - onset_abovethreshold[0]
+print(tdoas_relm0)
+
+    
+plt.figure()
+a2 = plt.subplot(411)
+plt.plot(lp_envelope_audio[:,0])
+plt.hlines(calc_threshold(lp_envelope_audio[:,0],thresh), 
+                           0, lp_envelope_audio[:,0].size)
+for i in range(1,4):
+    plt.subplot(411+i, sharex=a2, sharey=a2)
+    plt.plot(lp_envelope_audio[:,i])
+    plt.hlines(calc_threshold(lp_envelope_audio[:,i],thresh), 
+                           0, lp_envelope_audio[:,i].size)
+
+#%%
+
+
+tdoa_allowance = min_fluctuation*2
+
+all_candidate_tdoas = np.array(potential_tdoas)
+
+tdoa_discrepancy = []
+for candidate in range(all_candidate_tdoas.shape[0]):
+    tdoa_diff = np.max(np.abs(all_candidate_tdoas[candidate,:] - tdoas_relm0))
+    tdoa_discrepancy.append(tdoa_diff)
+tdoa_discrepancy = np.array(tdoa_discrepancy)
+
+# choose the top 3 matches 
+lowest_tdoa_discrepancies_ind = np.argpartition(-tdoa_discrepancy, -3)[-3:]
+lowest_tdoa_discrepancies = [all_candidate_tdoas[each]for each in lowest_tdoa_discrepancies_ind]
+
+for each in lowest_tdoa_discrepancies:
+    d_potential = np.array(each)*vsound
+    pos1, pos2 = sw02.spiesberger_wahlberg_solution(mic_positions.T, d_potential)
+    print(pos1, pos2)
+
+print(f'actual position {source_positions[position_number,:]}')
+
+
+#%% Now check to see if there are any common fixes suggested by the range estimate
+# and the onset based TDOA localisation 
+
+
+
+

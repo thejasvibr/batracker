@@ -61,8 +61,14 @@ for each in range(source_positions.shape[0]):
 room.simulate()
 
 channel_audio = []
+
+rms_noise = 1e-8
 for i in range(4):
-    channel_audio.append(room.mic_array.signals[i,:])
+    # add noise
+    channel_audiodata = room.mic_array.signals[i,:]
+    channel_noise = np.random.normal(0,rms_noise,channel_audiodata.size)
+    channel_audiodata += channel_noise
+    channel_audio.append(channel_audiodata)
 
 plt.figure()
 a1 = plt.subplot(411)
