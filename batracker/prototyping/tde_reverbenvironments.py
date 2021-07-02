@@ -109,7 +109,7 @@ tde_peaks_m03_time = [(each- tdes_m03[i].size/2.0)/fs for i,each in enumerate(td
 # N channels? Is there some way we can figure out which ones are 'true' positions? Here we have 64 potential
 # localisations!!! 
 
-position_number = 9
+position_number = 5
 all_potential_tdes = [ each[position_number] for each in [tde_peaks_m01_time,tde_peaks_m02_time,tde_peaks_m03_time]]
 
 potential_tdoas = []
@@ -306,17 +306,29 @@ tdoa_discrepancy = np.array(tdoa_discrepancy)
 lowest_tdoa_discrepancies_ind = np.argpartition(-tdoa_discrepancy, -3)[-3:]
 lowest_tdoa_discrepancies = [all_candidate_tdoas[each]for each in lowest_tdoa_discrepancies_ind]
 
+onset_based_refinement = []
 for each in lowest_tdoa_discrepancies:
     d_potential = np.array(each)*vsound
     pos1, pos2 = sw02.spiesberger_wahlberg_solution(mic_positions.T, d_potential)
-    print(pos1, pos2)
-
-print(f'actual position {source_positions[position_number,:]}')
-
+    if pos1[1]>0:
+        onset_based_refinement.append(pos1)
+    elif pos2[1]>0:
+        onset_based_refinement.append(pos2)
+onset_based_refinement = np.array(onset_based_refinement)
 
 #%% Now check to see if there are any common fixes suggested by the range estimate
 # and the onset based TDOA localisation 
 
+# check for common position candidates 
+common_rows = (onset_based_refinement[:, None] ==refined_candidate_positions).all(-1).any(1)
+common_candidates = onset_based_refinement[common_rows,:]
 
 
+# OR when no common points are there - look for points with the best matches
+common_points = spatial.distance_matrix(onset_based_refinement, refined_candidate_positions)
 
+
+avg_common = np.mean(common_candidates, 0)
+total_euc_error = spatial.distance.euclidean(avg_common, source_positions[position_number,:])
+print(f'Average consesus: {avg_common} \n Actual position: {source_positions[position_number,:]} \
+      Error: {total_euc_error}')
