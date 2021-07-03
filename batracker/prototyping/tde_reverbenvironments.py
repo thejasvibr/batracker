@@ -332,3 +332,5 @@ avg_common = np.mean(common_candidates, 0)
 total_euc_error = spatial.distance.euclidean(avg_common, source_positions[position_number,:])
 print(f'Average consesus: {avg_common} \n Actual position: {source_positions[position_number,:]} \
       Error: {total_euc_error}')
+
+
