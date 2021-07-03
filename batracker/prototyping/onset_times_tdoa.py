@@ -150,11 +150,13 @@ for band, bp_tdoas in band_tde_combinations.items():
 
 
 #%% Take the ACC of each channel:
-small_audioseg = audio_segments[0][int(0.18*fs):,:]
+small_audioseg = audio_segments[0][int(0.18*fs):int(0.19*fs):,:]
+ch0 = small_audioseg[:,0]
+chx = small_audioseg[:,3]
 
-acc0 = signal.correlate(small_audioseg[:,0],small_audioseg[:,0],'full')
-acc1 = signal.correlate(small_audioseg[:,1],small_audioseg[:,1],'full')
-cc = signal.correlate(small_audioseg[:,1],small_audioseg[:,0],'full')
+acc0 = signal.correlate(ch0,ch0,'full')
+acc1 = signal.correlate(chx,chx,'full')
+cc = signal.correlate(chx,ch0,'full')
 
 plt.figure()
 a0 = plt.subplot(311)
@@ -168,6 +170,6 @@ plt.legend()
 
 plt.figure()
 a1 = plt.subplot(211)
-plt.specgram(small_audioseg[:,0],Fs=fs)
+plt.specgram(ch0,Fs=fs)
 plt.subplot(212, sharey=a1, sharex=a1)
-plt.specgram(small_audioseg[:,1],Fs=fs)
+plt.specgram(chx,Fs=fs)
