@@ -150,7 +150,7 @@ for band, bp_tdoas in band_tde_combinations.items():
 
 
 #%% Take the ACC of each channel:
-small_audioseg = audio_segments[0][int(0.18*fs):int(0.19*fs):,:]
+small_audioseg = audio_segments[0][int(0.187*fs):int(0.205*fs):,:]
 ch0 = small_audioseg[:,0]
 chx = small_audioseg[:,3]
 
