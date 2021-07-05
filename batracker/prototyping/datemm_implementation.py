@@ -4,11 +4,13 @@
 DATEMM implementation attempt
 =============================
 Scheuing and Yang 2008 [1] present the DATEMM algorithm which implements many of
-the ideas I was only vaguely intuiting. Most importantly they look at two criteria:
-    1) The auto-correlation of each channel tells us the 'lags' at which copies of the signal arrived. 
-        * The last peak in the auto-correlation tells us the first time of arrival of the signal 
-        * These 'extremum' positions can then inform sensible TDE's between microphone pairs
-        * A general set of potential TDOA's can thus be generated
+the ideas I was only vaguely intuiting. Most importantly the:
+    * The auto-correlation of each channel tells us the 'lags' at which indirect paths of the signal arrived
+        eg. Signal A at channel 0, has lags of 10, 25, 41, and channel 1 has lags of 25, 32, 5
+    * The indirect path delays show up in combinations in the channel pair cross-correlations:
+        eg. the cc has peaks at 15 (result of ch1:lag25 - ch0:lag10) or 16 (result of ch0:lag41-ch1:lag25)
+    * Figuring out which of the channel-pair time delays can be explained by 
+
     2) The 'valid' set of TDOA's can be figured out by using the zero-cyclic sum condition between 
         any set of 3 microphones. That is :math:`\tau_{20} +\tau_{21}+\tau_{10} = 0 ` and so on, 
         for each 'sub-triangle'
@@ -108,29 +110,43 @@ def generate_multich_autocorrelation(audio, fs):
 
 #%% Refine autocorrelations and detect peaks. 
 
-def detect_autocorrelation_peaks(acc_mat, fs, **kwargs):
+def detect_peaks(acc, fs, **kwargs):
     '''
-    Peak detection is done by squaring the autocorrelation signal 
-    and lowpass filtering it to remove small time-scale fluctuations. 
-    
-    Peaks are detected for all parts of the 
+    Peak detection is done by taking the input auto/cross-correlation, and
+    performing peak detection. 
+
+
 
     Parameters
     ----------
-    acc_mat : np.array
-        Msamples x Nchannels with autocorrelation of each audio channel 
-    fs : float>)
-    time_resolution : float>0, optional
-        The time resolution of the autocorrelation peak detection. 
-        Defaults to 0.1 milliseconds
-    min_duration : float>0, optional 
-        The minimum duration of a sound. Defaults to 3 milliseconds
-    
+    acc : np.array
+        Auto/crosss-correlation of one audio channel 
+    fs: float>0
+        Sampling rate in Hz
+    peak_threshold: 0<float<100, optional
+        The percentile threshold of the autocorrelation signal 
+        that sets the absolute value threshold for a peak. Defaults to 10..
+    min_interpeak_distance: float>0, optional 
+        expected interpeak distance., defaults to 0.2 milliseconds
+
     Returns 
     -------
+    peaks : np.array
+        With indices of peak locations. 
+    
+    See Also
+    --------
+    scipy.signal.find_peaks
     
     '''
+    interpeak = int(fs*kwargs.get('min_interpeak_distance', 5e-4))
+    thresh = np.percentile(acc, kwargs.get('peak_threshold',10))
+    rel_thresh = thresh/np.max(acc)
+    peaks, _ = signal.find_peaks(acc,
+                                    height=rel_thresh,distance=interpeak)
+    return peaks
 
+#%%
 
 if __name__ == '__main__':
     #%%
@@ -156,22 +172,28 @@ if __name__ == '__main__':
     small_audioseg = audio_segments[3][int(0.12*fs):int(0.140*fs):,:]
     
     #%%
-    
+
     # generate multichannel GCC
     mch_gcc = generate_multich_gcc(small_audioseg)
-    # choose top X peaks of time delay     
-    mch_tdes = generate_multich_tdes(mch_gcc, fs, n_peaks=10) 
-
-    # Autocorrelation for each channel     
-    acmat = generate_multich_autocorrelation(small_audioseg,fs)
+    mch_gcc_peaks = {}
     
-    b,a = signal.butter(1, )
-    acc_lp_ch = signa
-    channel = 1
-    thresh = np.percentile(np.abs(acmat[:,channel]), 25)
-    rel_thresh = thresh/np.max(np.abs(acmat[:,channel]))
-    peaks_00, _ = signal.find_peaks(np.abs(acmat[:,channel]),height=rel_thresh,distance=(fs*0.5e-3))
+    for channel_pair, gcc in mch_gcc.items():
+        mch_gcc_peaks[channel_pair] = detect_peaks(gcc,fs,peak_threshold=15)
 
     plt.figure()
-    plt.plot(np.abs(acmat[:,channel]))
-    plt.plot(peaks_00, np.abs(acmat[peaks_00,channel]),'*')    
+    plt.plot(mch_gcc[0,1])
+    plt.plot(mch_gcc_peaks[0,1], mch_gcc[0,1][mch_gcc_peaks[0,1]], '*')
+    
+    # choose top X peaks of time delay     
+    mch_tdes = generate_multich_tdes(mch_gcc, fs, n_peaks=10) 
+    #%%
+    # Autocorrelation for each channel     
+    acmat = generate_multich_autocorrelation(small_audioseg,fs, )
+    multich_accpeaks = {}
+    for each in range(4):
+        multich_accpeaks[each] = detect_peaks(acmat[:,each],fs,
+                                                    speak_threshold=15)
+
+#%% Now check which of the cross-correlation peaks can be explained by 
+# the result of a non-direct path. 
+
