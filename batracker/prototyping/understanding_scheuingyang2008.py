@@ -103,18 +103,17 @@ for i in range(4) :
     for j in range(1,4):
         if i!=j:
             cc_peaks[(i,j)] = cc_and_acc_peaks(multich_cc[(i,j)])
-#%% 
+##%% 
 plt.figure()
-cc1 = plt.subplot(311)
 plt.plot(multich_cc[(0,1)])
 peakinds = cc_peaks[(0,1)]
 plt.plot(peakinds, multich_cc[(0,1)][peakinds],'*')
-plt.subplot(312, sharex=cc1)
-plt.plot(multich_acc[:,0])
-plt.plot(acc_peaks[0], multich_acc[acc_peaks[0],0],'*')
-plt.subplot(313, sharex=cc1)
-plt.plot(multich_acc[:,1])
-plt.plot(acc_peaks[1], multich_acc[acc_peaks[1],1],'*')
+#plt.subplot(312, sharex=cc1)
+#plt.plot(multich_acc[:,0])
+#plt.plot(acc_peaks[0], multich_acc[acc_peaks[0],0],'*')
+#plt.subplot(313, sharex=cc1)
+#plt.plot(multich_acc[:,1])
+#plt.plot(acc_peaks[1], multich_acc[acc_peaks[1],1],'*')
 
 
 #%% Now, perform the direct/echo path matching. Which of the cross-cor peaks
@@ -124,6 +123,65 @@ cc_peak01 = cc_peaks[(0,1)]
 peak_quality = multich_cc[(0,1)][cc_peak01 ] # initial values
 gamma_twrm = 20
 direct_path_hits = np.zeros(len(cc_peak01 ))
+
+#%%
+# also make the quality vector now
+q_array = multich_cc[(0,1)][cc_peak01]
+
+#%%
+
+def calculate_TDE_qualityfactor(crosscor_ba, acc_a, acc_b):
+    '''
+    Implements direct path matching and calculates quality factor. 
+    The relevant portions are described in eqns. 11-15
+    
+    Parameters
+    ----------
+    crosscor_ba : tuple
+        Tuple containing the crosscorrelation and the peaks: (crosscorrelation, peaks).
+        The crosscorrelation is of channel b with ref. to channel a.
+    acc_a, acc_b : tuple
+        Tuple with autocorrelation and peaks: (autocorreation, peaks_autocorr)
+    twrm: int>0, optional
+        The 'tolerance width of raster match' in samples. Defaults to 10 samples. 
+    
+    Returns 
+    -------
+    quality_factor : np.array
+        Of same size as crosscorrelation peaks.
+    
+    Notes
+    -----
+    * All peak values should in units of sample indices - and not in time
+    * The peaks for autocorrelation must be 'centred' (those that are on the left
+    of the centre must have -ve values and on the right have +ve values)
+
+    '''
+    cc_ba, cc_peaks = crosscor_ba
+    autocc_a, accpeaks_a = acc_a
+    autocc_b, accpeaks_b = acc_b
+
+    quality_factor = cc_ba[cc_peaks] #set initial values to r_kls
+    
+    for i, each_ccpeak in enumerate(cc_peaks[:-1]):
+        # check the left-to-right matching for chA
+        for other_ccpeak in enumerate(cc_peaks[i+1:]):
+            ccpeak_gap = other_ccpeak - each_ccpeak
+            if ccpeak_gap
+        
+        
+        # check the right-to-left matching for chB
+    
+        #store matching ACC peaks into P_kkprime and P_llprime
+        
+        # 
+def TFRM(autocorr_delay, cc_peak1, cc_peak2, tfrm):
+    difference = np.abs(autocorr_delay) - np.abs(cc_peak2-cc_peak1)
+    
+    if difference < 0.5*tfrm:
+        return 1 - np.abs(difference)/(0.5*tfrm)
+    else:
+        return 0
 
 for i, each_ccpeak in enumerate(cc_peak01[:-1]):
     # search from L--R for ch0
@@ -141,5 +199,3 @@ for i, each_ccpeak in enumerate(cc_peak01[:-1]):
         within_twrm = np.abs(np.abs(peak_diff)-acc_peaks[1])<= 0.5*gamma_twrm
         if np.sum(within_twrm)>0:
             direct_path_hits[n_ccs-i] += 1        
-    
-#rray([2256, 3434, 3468, 4646])
