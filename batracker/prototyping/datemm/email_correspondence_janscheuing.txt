@@ -1,0 +1,83 @@
+Thejasvi's original email to Prof. Bin Yang, who then forwarded the email to Jan Scheuing. 
+
+ Datum:
+> Thu, 8 Jul 2021 09:02:51 +0000
+> Von:
+> Beleyur, Thejasvi Ravindra <tbeleyur@orn.mpg.de><mailto:tbeleyur@orn.mpg.de>
+> An:
+> bin.yang@lss.uni-stuttgart.de<mailto:bin.yang@lss.uni-stuttgart.de> <bin.yang@lss.uni-stuttgart.de><mailto:bin.yang@lss.uni-stuttgart.de>
+> 
+> 
+> Hello Prof. Yang,
+> 
+> I'm a postdoc working on acoustic tracking of bat echolocation calls at the
+> 
+> Centre for Advanced Study of Collective Behaviour at Uni Konstanz.
+> 
+> 
+> 
+> I came across your 2008 DATEMM paper (IEEE trans. audio, speech and language processing) - which I think will greatly help in improving the acoustic tracking of my bat calls in reverberant cave environments.
+> 
+> 
+> 
+> I was wondering if you'd be willing to share the code for this paper?
+> 
+> 
+> 
+> best regards,
+> 
+> 
+> 
+> Thejasvi
+
+Reply from Jan Scheuing :
+
+2021-06-08 23:05
+
+Hello Thejasvi,
+
+proud to read that my papers are still read :-)
+Bat calls in reverberant caves... yes, that sounds challenging.
+
+So my first intention after I read your mail forwarded by Prof. Yang was
+"of course I would like to support your studies and will share the
+code". The second thought was something like "OMG, it was already 13
+years ago, time is running".
+Finally the question "where is the code and in what state..." came into
+my mind - as I remembered that later I integrated DATEMM into a quite
+complex online localization demonstrator environment with OpenGL-based,
+touch screen controlled 3D visualization (cutting edge in those days I
+guess) and therefore rewrote it in a no-more-obvious C :-)
+
+So I searched in my backups (don't worry, I suprised myself who quick I
+could find it) and attached you the basis MATLAB-version of DATEMM. In
+my today's eyes, the code has much too little comments, it is not
+self-explaining and I'm not sure if I'ld still be able to explain every
+line, although the lines were definitely all written by me - sorry for
+that. Nevertheless I'm sure you can find a way through...
+
+As starting point and as far as I remember:
+
+messung.m contains the framework, plotting real and detected sources,
+microphones and walls of my demo room and providing measured
+(synchronous) 8 mic channels to the algorithm.
+
+main_18.m contains the main DATEMM algo, calling different subfunctions,
+some of them already written in C and mex-compiled for speed-up. I
+remember I also had different localization algos, the one included is
+the One-Step-Least-Squares by Huang (hope you know/find the paper),
+which seems to be my choice of a best tradeoff in performance vs.
+runtime consumption at that time.
+
+I guess some functions (including the subfolder) are off-topic, I had
+some acoustic room emulations running in parallel - so just ignore.
+
+Feel free to ask questions, but don't expect too much support.
+Also feel free to use, extend, optimize the code within you studies.
+In case of any publishing, patent application, licencing, value
+creation, ... I would be glad if you would remember me.
+
+Best regards
+Jan Scheuing
+
+
