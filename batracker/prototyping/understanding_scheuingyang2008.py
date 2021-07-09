@@ -57,7 +57,7 @@ def simulate_sound_propagation(**kwargs):
         start_direct, start_indirect = toa_samples[0,channel], toa_samples[1,channel]
         audio[start_direct:start_direct+chirp.size,channel] += chirp*random_atten[0]
         audio[start_indirect:start_indirect+chirp.size,channel] += chirp*random_atten[1]
-    audio += np.random.normal(0,1e-3,audio.size).reshape(audio.shape)
+    audio += np.random.normal(0,1e-5,audio.size).reshape(audio.shape)
     return audio , dist_mat, tristar
 
 
@@ -65,9 +65,9 @@ def simulate_sound_propagation(**kwargs):
 
 def generate_multich_crosscorr(input_audio):
     '''
-    Generates all unique pair cross-correlations. The pairs are designated
-    by a tuple where the second number is the reference channel, eg. (1,0)
-    where channel 1 is cross-correlated with reference to channel 0
+    Generates all unique pair cross-correlations: (NxN-1)/2 pairs. Each pair is
+    designated by a tuple where the second number is the reference channel, eg. (1,0)
+    where channel 1 is cross-correlated with reference to channel 0. 
 
     Parameters
     ----------
@@ -255,6 +255,67 @@ def gamma_tftm(delay, tftm, **kwargs):
         else:
             return weighting_function(delay, tftm)
 #%% 
+    def cyclic_tde_sum(tde_ba, tde_bc, tde_ac):
+        return tde_ba+tde_bc+tde_ac
+
+
+    def calculate_connectivity():
+        '''
+        the 'w' term described in equation 24, where broadly speaking:
+
+            :math:`w = \Sigma_{all\:consistent\:triples} \Gamma_{TFTM}(cyclic \:sum \:of \:triple)
+        
+            
+        
+        '''
+    
+    def parse_triplet_graph_key(triplet_key):
+        '''
+        parses and splits the input string of the following format:
+        
+        
+        'micA,micB,micC;tde_ba,tde_bc,tde_ac'
+        Here micA,B,C are >=0 integers, while tde_ba,_bc,_ac are 
+        also integers that can be <=0 or >0. 
+        
+        
+        Parameters
+        ----------
+        triplet_key : str
+            See description.
+        
+        Returns
+        -------
+        (mica,micb,micc),(tdeba,tdebc,tdeac): str
+        '''
+        mic_ids, tde_values = triplet_key.split(';')
+        mica, micb, micc = mic_ids.split(',')
+        tde_a, tde_b, tde_c = tde_values.split(',')
+        return (mica, micb, micc), (tde_a, tde_b, tde_c)
+#%%
+                
+    def find_quadruplet_from_triplet_set(starter_triplet, candidate_triplets, **kwargs):
+        '''
+        The candidate triplet list is first cut down to show only those whose 
+        nodes have at least one different microphone. 
+        
+        Then all candidates are checked for two common nodes and the same edge length. 
+        
+        
+        '''
+        # remove all candidate triplets with the exact same mic numbers     
+        subset_of_triplets = remove_exactly_same_triplets(starter_triplet,
+                                                                candidate_triplet)
+        if not len(subset_of_triplets)>0:
+            return None
+            
+        for candidate_triplet in subset_of_triplets:
+            commonality_found = check_for_common_edge_and_nodes(starter_triplet, candidate_triplet)
+            if commonality_found: 
+                quadruplet = fuse_two_triplets(starter_triplet, candidate_triplet)
+                return quadruplet
+
+#%% 
 if __name__ == '__main__':
     #%%
     # make simulated audio and generate cross-cor + auto-cor
@@ -288,9 +349,12 @@ if __name__ == '__main__':
                                                              q_vector,
                                                              array_geom,
                                                              fs)
-        
+        # 'centre' the cross-correlation peaks to get negative
+        # and positive values for values on the left and right 
+        # of the 0 lag in the centre.
         crosscor_peaks[each_pair] = good_cc_peaks-sim_audio.shape[0]*0.5
-    #%% Now create all  possible triples
+    #%% Now create *all* pair TDOA peaks, using the relation 
+    # TDE_ba = -TDE_ab
     comprehensive_crosscorpeaks = {}
     for pair, tdes in crosscor_peaks.items():
         mic_x, mic_y = pair
@@ -316,7 +380,7 @@ if __name__ == '__main__':
                 for tde_ac in comprehensive_crosscorpeaks[(mic_a, mic_c)]:
                     consistency = tde_ba + tde_bc + tde_ac
                     if np.abs(consistency)<=tftm_samples:
-                        key = str(f'{mic_b},{mic_a},{tde_ba};{mic_b},{mic_c},{tde_bc};{mic_a},{mic_c},{tde_ac}')
+                        key = str(f'{mic_a},{mic_b},{mic_c};{tde_ba},{tde_bc},{tde_ac}')
                         consistency_score = gamma_tftm(consistency, tftm_samples)
                         consistent_triples[key] = consistency_score
     #%% Choose the most consistent triple and proceed to make a quadruplet 
@@ -328,8 +392,8 @@ if __name__ == '__main__':
     # now remove this triplet and all other triplets with the same mics in them 
     candidate_triplets = copy.deepcopy(consistent_triples)
     candidate_triplets.pop(most_consistent_triplet)
-    ab, bc, ac = most_consistent_triplet.split(';')
-
     
-        
+    candidate_triplet_graphs = list(candidate_triplets.keys())
+    
+    #%% Proceed iteratively and generate 
     
