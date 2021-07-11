@@ -193,54 +193,90 @@ def calculate_consistency_of_quadruple(graph, **kwargs):
         deviation = graph.loc[mic_a,mic_b]+graph.loc[mic_b,mic_c]-graph.loc[mic_a,mic_c]
         total_consistency += gamma_tftm(np.abs(deviation), kwargs.get('tftm',10))
     return total_consistency
+#%%
+    
+def look_to_make_quadruple(seed_graph, candidate_graphs):
+    '''
+    '''
+    potential_additions = []
+    matching_triple_ids = []
+    starting_mics = set([str(each) for each in seed_graph.columns])
+    potential_additions.append(seed_graph)
+    for each_triple, graph in candidate_graphs.items():
+        # if the triple shares 2 nodes and and edge - keep  it
+        abc = set(each_triple.split(';')[0].split(','))
+        common_mics = starting_mics.intersection(abc)
+        two_mics_common = len(common_mics)==2
+        if two_mics_common:
+            # look for a common edge
+            common_mic1, common_mic2 = [int(each) for each in common_mics]
+            if graph.loc[common_mic1, common_mic2] == seed_graph.loc[common_mic1, common_mic2]:
+                # put it  into the list only if the same mic combination hasn't been
+                # appended already 
+                hits  = 0 
+                for each in potential_additions:
+                    if np.allclose(each.columns, graph.columns):
+                        hits += 1 
+                if hits == 0:
+                    if len(potential_additions)<3:
+                        potential_additions.append(graph)
+                        matching_triple_ids.append(each_triple)
+                    else:
+                        pass
+    return potential_additions, matching_triple_ids
 
 #%% Choose the most consistent triple and proceed to make a quadruplet 
 # do this multiple times until no more quadruplets can be formed.
 
-best_starting_triple = list(good_triples.keys())[0]#[9]
-best_triple = good_triples[best_starting_triple]
-starting_mics = set(best_starting_triple.split(';')[0].split(','))
-
+quadruplets_formable = True
 candidate_pool =  copy.deepcopy(good_triples)
-candidate_pool.pop(best_starting_triple)
+i= 0
+failed_attempt = 0
 
-potential_additions = []
-for each_triple, graph in candidate_pool.items():
-    # if the triple shares 2 nodes and and edge - keep  it
-    abc = set(each_triple.split(';')[0].split(','))
-    common_mics = starting_mics.intersection(abc)
-    two_mics_common = len(common_mics)==2
-    if two_mics_common:
-        # look for a common edge
-        common_mic1, common_mic2 = [int(each) for each in common_mics]
-        if graph.loc[common_mic1, common_mic2] == best_triple.loc[common_mic1, common_mic2]:
-            # put it  into the list only if the same mic combination hasn't been
-            # appended already 
-            hits  = 0 
-            for each in potential_additions:
-                if np.allclose(each.columns, graph.columns):
-                    hits += 1 
-            if hits == 0:
-                potential_additions.append(graph)
+all_quadruples = []
+while quadruplets_formable:
+    best_starting_triple = list(candidate_pool.keys())[i]   
+    best_triple = candidate_pool[best_starting_triple]
+    quadruple_candidates, ids_to_remove = look_to_make_quadruple(best_triple, candidate_pool)
+    if len(quadruple_candidates)==3:
+        candidate_pool.pop(best_starting_triple)
+        # remove the triplets
+        for each in ids_to_remove:
+            candidate_pool.pop(each)
+        all_quadruples.append(quadruple_candidates)
+            
+    else:
+        failed_attempt += 1
+    if np.logical_or(failed_attempt >=100, len(candidate_pool)<=4):
+        quadruplets_formable = False
+    i += 1
+    
+
+#%%
+quadruple_reproj_errors = []
+quadruple_consistency = []
+for each in all_quadruples:
         
-
-valid_quadruple = does_it_make_a_quadruple(potential_additions)
-if valid_quadruple:
-    iop = make_quadruple_from_3_triples(potential_additions)
+    valid_quadruple = does_it_make_a_quadruple(each)
+    if valid_quadruple:
+        iop = make_quadruple_from_3_triples(each)
+        
+        d_matrix = (iop.loc[:,0]/fs)*vsound
+        d = d_matrix.to_numpy()[1:]
+        array_geom_tracking = array_geom.copy()
+        
+        pos1, pos2 = sw02.spiesberger_wahlberg_solution(array_geom_tracking, d)
     
-    d_matrix = (iop.loc[:,0]/fs)*vsound
-    d = d_matrix.to_numpy()[1:]
-    array_geom_tracking = array_geom.copy()
+    # now perform the TDOA re-projection to check if there were some phantom mirrors
+    positions = {0:pos1, 1:pos2}
+    position_with_positive_y = int(np.argwhere([pos1[1]>=0, pos2[1]>=0])[0])
+    sourcepos_estimate = positions[position_with_positive_y]
+    reprojected_tdoas = get_tdoa_matrix(sourcepos_estimate, array_geom)
+    reprojected_tdoas_sampels = (reprojected_tdoas/vsound)*fs
     
-    pos1, pos2 = sw02.spiesberger_wahlberg_solution(array_geom_tracking, d)
-    print(pos1, pos2)
-    print(calculate_consistency_of_quadruple(iop))
-
-#%% now perform the TDOA re-projection to check if there were some phantom mirrors
-positions = {0:pos1, 1:pos2}
-position_with_positive_y = int(np.argwhere([pos1[1]>=0, pos2[1]>=0])[0])
-sourcepos_estimate = positions[position_with_positive_y]
-reprojected_tdoas = get_tdoa_matrix(sourcepos_estimate, array_geom)
-reprojected_tdoas_sampels = (reprojected_tdoas/vsound)*fs
-
-np.nansum(np.tril(np.abs(reprojected_tdoas_sampels-iop)))
+    error = np.nansum(np.tril(np.abs(reprojected_tdoas_sampels-iop)))
+    quadruple_reproj_errors.append(error)
+    quadruple_consistency.append(calculate_consistency_of_quadruple(iop))
+#%%
+print(quadruple_reproj_errors)
+print(quadruple_consistency)
