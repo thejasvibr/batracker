@@ -13,6 +13,7 @@ Created on Mon Jul  5 10:48:01 2021
 #%%
 import numpy as np 
 np.random.seed(82319)
+import pandas as pd
 import scipy.signal  as signal 
 import scipy.spatial as spatial 
 import matplotlib.pyplot as plt 
@@ -28,6 +29,7 @@ def simulate_sound_propagation(**kwargs):
                             [-R*np.sin(theta), 0, -R*np.cos(theta)],
                             [R*np.sin(theta), 0, -R*np.cos(theta)],
                             [0,0, R]))
+    tristar[:,1] += [1e-3, 0.5e-3, 0.25e-3, 0.15e-3]
     
     sound_pos = kwargs.get('sound_pos',np.array([3,2,1]))
     reflection_source = kwargs.get('reflection_source',np.array([1,4,1]))
@@ -58,7 +60,7 @@ def simulate_sound_propagation(**kwargs):
         audio[start_direct:start_direct+chirp.size,channel] += chirp*random_atten[0]
         audio[start_indirect:start_indirect+chirp.size,channel] += chirp*random_atten[1]
     audio += np.random.normal(0,1e-5,audio.size).reshape(audio.shape)
-    return audio , dist_mat, tristar
+    return audio , dist_mat, tristar, (sound_pos, reflection_source)
 
 
 #%% Generate the cross-corr for each channel pair
@@ -87,7 +89,7 @@ def generate_multich_crosscorr(input_audio):
         # make sure the lower channel number is the reference signal 
         signal_ch, ref_signal = sorted([cha, chb], reverse=True)
         multichannel_cc[(signal_ch, ref_signal)] = signal.correlate(input_audio[:,signal_ch],
-                                                                 input_audio[:,ref_signal],'same')
+                                                                 input_audio[:,ref_signal],'full')
     return multichannel_cc
 
 def generate_multich_autocorr(input_audio):
@@ -353,6 +355,8 @@ if __name__ == '__main__':
         # and positive values for values on the left and right 
         # of the 0 lag in the centre.
         crosscor_peaks[each_pair] = good_cc_peaks-sim_audio.shape[0]*0.5
+        
+    
     #%% Now create *all* pair TDOA peaks, using the relation 
     # TDE_ba = -TDE_ab
     comprehensive_crosscorpeaks = {}
@@ -366,9 +370,10 @@ if __name__ == '__main__':
     #%% 
     all_triples = list(combinations(range(4), 3))
     # for each triple, try out all possible tdoas
-    tftm_seconds = 1.5e-3
+    tftm_seconds = 1.7e-3 # seconds
     tftm_samples = int(tftm_seconds*fs)
     consistent_triples = {}
+    consistent_triple_scores = {}
     
     for each_triple in all_triples:
         mic_a, mic_b, mic_c = each_triple
@@ -379,21 +384,61 @@ if __name__ == '__main__':
             for tde_bc in comprehensive_crosscorpeaks[(mic_b, mic_c)]:
                 for tde_ac in comprehensive_crosscorpeaks[(mic_a, mic_c)]:
                     consistency = tde_ba + tde_bc + tde_ac
+                    trip_serialnum = 0
                     if np.abs(consistency)<=tftm_samples:
-                        key = str(f'{mic_a},{mic_b},{mic_c};{tde_ba},{tde_bc},{tde_ac}')
+                        key = str(f'{mic_a},{mic_b},{mic_c};{trip_serialnum}')
+                        while key in list(consistent_triples.keys()):
+                            trip_serialnum += 1 
+                            key = str(f'{mic_a},{mic_b},{mic_c};{trip_serialnum}')
+                        graph = np.zeros((3,3))
+                        graph[1,0] = tde_ba; graph[0,1] = -tde_ba;
+                        graph[1,2] = tde_bc; graph[2,1] = -tde_bc;
+                        graph[0,2] = tde_ac; graph[2,0] = -tde_ac
+                        df_graph = pd.DataFrame(graph)
+                        df_graph.columns = [mic_a, mic_b, mic_c]
+                        df_graph.index = [mic_a, mic_b, mic_c]
+                        
                         consistency_score = gamma_tftm(consistency, tftm_samples)
-                        consistent_triples[key] = consistency_score
+                        consistent_triple_scores[key] = consistency_score
+                        consistent_triples[key] = df_graph
+
     #%% Choose the most consistent triple and proceed to make a quadruplet 
+    # do this multiple times until no more quadruplets can be formed.
     import copy
-    values = sorted(list(consistent_triples.values()))
+    values = sorted(consistent_triple_scores.values())
     sorted_values = sorted(values, reverse=True)
     keys = list(consistent_triples.keys())
     most_consistent_triplet = keys[values.index(sorted_values[0])]
+    mic_ids, _ = most_consistent_triplet.split(';')
+    best_triplet = consistent_triples[most_consistent_triplet]
     # now remove this triplet and all other triplets with the same mics in them 
     candidate_triplets = copy.deepcopy(consistent_triples)
     candidate_triplets.pop(most_consistent_triplet)
-    
     candidate_triplet_graphs = list(candidate_triplets.keys())
     
-    #%% Proceed iteratively and generate 
+    commonedge_triples = []
+    for each_triplet, graph in candidate_triplets.items():
+        triplet_ids, _ = each_triplet.split(';')
+        common_mics = set(triplet_ids.split(',')).intersection(set(mic_ids.split(',')))
+        common_mics = list([int(each) for each in common_mics])
+
+        if len(common_mics) ==2:
+            print(common_mics, triplet_ids, each_triplet)
+            # now check for the same edge length betweeen nodes
+            if graph.loc[common_mics[0],common_mics[1]] == best_triplet.loc[common_mics[0],common_mics[1]]:
+                print('Quadruplet candidate found')
+                print(graph)
+                print(best_triplet)
+                commonedge_triples.append((triplet_ids, graph))
+            
+    print(commonedge_triples)
+        
+    #%% 
+    # Make a quadruplet
+    
+    
+    #%% Check to see if you can combine the quadruplets if they share a triplet
+    # between them. If yes, then this will make a sextet
+    
+    
     
