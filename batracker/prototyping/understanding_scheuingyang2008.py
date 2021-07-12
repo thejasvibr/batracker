@@ -18,7 +18,7 @@ import scipy.signal  as signal
 import scipy.spatial as spatial 
 import matplotlib.pyplot as plt 
 from itertools import combinations
-
+from gen_cross_corr import estimate_gcc
 #%%
 
 def simulate_sound_propagation(**kwargs):
@@ -65,7 +65,7 @@ def simulate_sound_propagation(**kwargs):
 
 #%% Generate the cross-corr for each channel pair
 
-def generate_multich_crosscorr(input_audio):
+def generate_multich_crosscorr(input_audio, **kwargs):
     '''
     Generates all unique pair cross-correlations: (NxN-1)/2 pairs. Each pair is
     designated by a tuple where the second number is the reference channel, eg. (1,0)
@@ -75,6 +75,10 @@ def generate_multich_crosscorr(input_audio):
     ----------
     input_audio: np.array
         M samples x N channels
+    gcc : boolean
+        Whether to use a gcc instead of the standard cross-correlation.    
+        Defaults to False.
+        
 
     Returns
     -------
@@ -88,8 +92,12 @@ def generate_multich_crosscorr(input_audio):
     for cha, chb in unique_pairs:
         # make sure the lower channel number is the reference signal 
         signal_ch, ref_signal = sorted([cha, chb], reverse=True)
-        multichannel_cc[(signal_ch, ref_signal)] = signal.correlate(input_audio[:,signal_ch],
+        if not kwargs.get('gcc',False):
+            multichannel_cc[(signal_ch, ref_signal)] = signal.correlate(input_audio[:,signal_ch],
                                                                  input_audio[:,ref_signal],'full')
+        else:
+            multichannel_cc[(signal_ch, ref_signal)] = estimate_gcc(input_audio[:,signal_ch],
+                                                                     input_audio[:,ref_signal])
     return multichannel_cc
 
 def generate_multich_autocorr(input_audio):
