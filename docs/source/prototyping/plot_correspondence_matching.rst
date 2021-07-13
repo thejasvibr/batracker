@@ -47,8 +47,8 @@ Possible approaches
  .. code-block:: none
 
     4 125000
-      0%|          | 0/4 [00:00<?, ?it/s]     25%|##5       | 1/4 [00:02<00:08,  2.79s/it]     50%|#####     | 2/4 [00:05<00:05,  2.77s/it]     75%|#######5  | 3/4 [00:08<00:02,  2.74s/it]    100%|##########| 4/4 [00:10<00:00,  2.73s/it]    100%|##########| 4/4 [00:10<00:00,  2.72s/it]
-    /home/autumn/Documents/trying_out/batracker/batracker/tests/prototyping/plot_correspondence_matching.py:194: MatplotlibDeprecationWarning: Adding an axes using the same arguments as a previous axes currently reuses the earlier instance.  In a future version, a new instance will always be created and returned.  Meanwhile, this warning can be suppressed, and the future behavior ensured, by passing a unique label to each axes instance.
+      0%|          | 0/4 [00:00<?, ?it/s]     25%|##5       | 1/4 [00:02<00:07,  2.40s/it]     50%|#####     | 2/4 [00:04<00:04,  2.40s/it]     75%|#######5  | 3/4 [00:07<00:02,  2.41s/it]    100%|##########| 4/4 [00:09<00:00,  2.43s/it]    100%|##########| 4/4 [00:09<00:00,  2.43s/it]
+    /home/autumn/Documents/research-repos/batracker/batracker/tests/prototyping/plot_correspondence_matching.py:194: MatplotlibDeprecationWarning: Adding an axes using the same arguments as a previous axes currently reuses the earlier instance.  In a future version, a new instance will always be created and returned.  Meanwhile, this warning can be suppressed, and the future behavior ensured, by passing a unique label to each axes instance.
       plt.subplot(num_channels*100  + 10+each+1, sharex = ax0)
 
 
@@ -278,7 +278,7 @@ Possible approaches
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  25.437 seconds)
+   **Total running time of the script:** ( 0 minutes  22.277 seconds)
 
 
 .. _sphx_glr_download_prototyping_plot_correspondence_matching.py:

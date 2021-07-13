@@ -47,7 +47,7 @@ vsound = 338.0
 sim_audio, dist_mat, array_geom, (source, reflector) = simulate_sound_propagation()
 # add an additional sound
 fs = 192000
-source2 = np.array([4,2.5,1])
+source2 = np.array([2,2.5,0.5])
 dist_to_source2 = [spatial.distance.euclidean(array_geom[each,:],source2) for each in range(4)]
 toa_source2 = np.int32((np.array(dist_to_source2)/vsound)*fs)
 
@@ -354,6 +354,9 @@ for each in quadruplets:
 #%%
 print(quadruple_reproj_errors)
 print(quadruple_consistency)
+
+plt.figure()
+plt.plot(quadruple_reproj_errors)
 #%%
 print('\n \n tdoa reprojection errors')
 quadruple_reproj_errors
@@ -361,5 +364,9 @@ quadruple_reproj_errors
 #%%
 print('\n \n estimated positions')
 estimated_positions
+# get all unique positions 
+
+
+
 
 

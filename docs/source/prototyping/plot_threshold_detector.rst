@@ -24,9 +24,9 @@ continuous regions.
  .. code-block:: none
 
     2 387840
-      0%|          | 0/2 [00:00<?, ?it/s]/home/autumn/Documents/trying_out/batracker/batracker/tests/prototyping/plot_threshold_detector.py:107: RuntimeWarning: divide by zero encountered in log10
+      0%|          | 0/2 [00:00<?, ?it/s]/home/autumn/Documents/research-repos/batracker/batracker/tests/prototyping/plot_threshold_detector.py:107: RuntimeWarning: divide by zero encountered in log10
       dB = lambda X : 20*np.log10(np.abs(X))
-     50%|#####     | 1/2 [00:06<00:06,  6.57s/it]    100%|##########| 2/2 [00:13<00:00,  6.74s/it]    100%|##########| 2/2 [00:13<00:00,  6.85s/it]
+     50%|#####     | 1/2 [00:06<00:06,  6.24s/it]    100%|##########| 2/2 [00:13<00:00,  6.51s/it]    100%|##########| 2/2 [00:13<00:00,  6.69s/it]
 
 
 
@@ -202,7 +202,7 @@ continuous regions.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.735 seconds)
+   **Total running time of the script:** ( 0 minutes  13.951 seconds)
 
 
 .. _sphx_glr_download_prototyping_plot_threshold_detector.py:

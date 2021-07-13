@@ -28,7 +28,7 @@ with the original simulated positions.
     import pandas as pd
     import scipy.io.wavfile as wavfile
     from batracker.signal_detection import detection
-    from batracker.correspondence import matching
+    from batracker.correspondence_matching import multichannel_match as matching
     from batracker.tdoa_estimation import tdoa_estimators
 
 
@@ -65,7 +65,7 @@ Generate an array geometry and use simulated source positions
                               [ 1, 0, 0],
                               [-1, 1, 0],
                               [ 0, 0.5, 0],
-                              [ 0, 0, 1]
+                              [-2,2,1]
                            ])
 
     x = np.linspace(2,10,3)
@@ -154,7 +154,7 @@ Detect the calls in each channel
  .. code-block:: none
 
     5 725707
-      0%|          | 0/5 [00:00<?, ?it/s]     20%|##        | 1/5 [00:15<01:02, 15.52s/it]     40%|####      | 2/5 [00:30<00:46, 15.34s/it]     60%|######    | 3/5 [00:45<00:30, 15.15s/it]     80%|########  | 4/5 [00:59<00:14, 14.92s/it]    100%|##########| 5/5 [01:14<00:00, 15.06s/it]    100%|##########| 5/5 [01:14<00:00, 14.98s/it]
+      0%|          | 0/5 [00:00<?, ?it/s]     20%|##        | 1/5 [00:15<01:03, 15.96s/it]     40%|####      | 2/5 [00:31<00:47, 15.76s/it]     60%|######    | 3/5 [00:46<00:31, 15.66s/it]     80%|########  | 4/5 [01:02<00:15, 15.58s/it]    100%|##########| 5/5 [01:16<00:00, 15.24s/it]    100%|##########| 5/5 [01:16<00:00, 15.31s/it]
 
 
 
@@ -174,7 +174,7 @@ inter-mic delays
     ag = pd.DataFrame(mic_positions)
     ag.columns  = ['x','y','z']
 
-    crosscor_boundaries = matching.match_by_max_distance(detections, ag)
+    crosscor_boundaries = matching.generate_crosscor_boundaries(detections, ag)
 
     num_channels = audio.shape[1]
 
@@ -238,7 +238,7 @@ Use the TDOAs to calculate positions of sound sources
 
  .. code-block:: none
 
-    /home/autumn/Documents/trying_out/batracker/batracker/localisation/friedlander_1987.py:103: FutureWarning: `rcond` parameter will change to the default of machine precision times ``max(M, N)`` where M and N are the input matrix dimensions.
+    /home/autumn/Documents/research-repos/batracker/batracker/localisation/friedlander_1987.py:100: FutureWarning: `rcond` parameter will change to the default of machine precision times ``max(M, N)`` where M and N are the input matrix dimensions.
     To use the future default and silence this warning we advise to pass `rcond=None`, to keep using the old, explicitly pass `rcond=-1`.
       xs,resid, _,_ = np.linalg.lstsq(MjSj, Mjmuj)
 
@@ -320,7 +320,7 @@ from the origin.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 1 minutes  19.111 seconds)
+   **Total running time of the script:** ( 1 minutes  19.999 seconds)
 
 
 .. _sphx_glr_download_prototyping_plot_start_to_end.py:

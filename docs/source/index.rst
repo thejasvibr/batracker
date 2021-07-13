@@ -31,15 +31,6 @@ Head here to check out the current ideas and example implementations
 being tried out in `batracker`
 
 
-
-Implemented to date
-~~~~~~~~~~~~~~~~~~~
-
-#. 2020-08-23 : The first start-to-end example in place. Sound sources, detected, matched and localised in this example.
-#. Localisation with 4 channels when given the time-difference of arrivals 
-
-
-
 Why this project
 ----------------
 Acoustic localisation is a pretty widely used method in bioacoustics. It can be used to track birds migrating and calling as they fly by, bats as they echolocate, and 
@@ -48,6 +39,15 @@ even dolphins and whales in the ocean. Many of the acoustic tracking workflows a
 `batracker` has been conceived as an alternate tracking solution which is 1) built from the start to be open-source and encourage collaboration and 2) designed keeping the simplest (few channels, single animal, non-reverberant) and toughest tracking situations (multi-channel, multi-animal, reverberant) in mind.
 
 Yes, this is kind of an attempt to re-invent the wheel, but to do so with as much of the techniques and code openly available. Inhouse scripts/packages work but just due to logistical/time constraints - there is no incentive to openly share the knowledge and document the methods involved. The project may be stable and work only for the specific workflow in a particular lab, and thus have a tiny community. Tiny communities aren't necessrily bad, but they also 1) increase the chance that a serious bug won't be caught 2) mean that someone else looking to do a similar thing won't really know where to start looking (and may have to start from scratch). For more advantages on being part of an open-source scientific community and why bigger collaborative software projects are the need of the moment in science, check out the experiences of `this author here <https://arxiv.org/abs/1301.7064>`_. 
+
+
+Implemented to date
+~~~~~~~~~~~~~~~~~~~
+
+#. 2020-08-23 : The first start-to-end example in place. Sound sources, detected, matched and localised in this example.
+#. Localisation with 4 channels when given the time-difference of arrivals 
+
+
 
 
 Mature projects that may be of interest
@@ -66,9 +66,12 @@ I describe here a few open-source packages which may be of interest and fill sim
 
 The example galleries above will help you understand the basic concepts and parameters used in various parts of the `batracker` package.
 
+`batracker` components + API
+----------------------------
+
 .. toctree::
     :maxdepth: 2
-    :caption: batracker components + API
+
 
     other_rst/signal_detection.rst
 
@@ -79,9 +82,3 @@ The example galleries above will help you understand the basic concepts and para
     other_rst/signal_localication.rst
 
 
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

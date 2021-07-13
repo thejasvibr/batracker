@@ -178,7 +178,7 @@ To check if my Schau & Robinson implementation is working I need a couple of thi
 
 
      Expected 
-    : [array([9.29390355, 5.74736256, 4.78577311]), array([0.33305026, 1.47315346, 1.61264748])]
+    : [array([ 1.8754065 , 42.44464966, 99.41354592]), array([1.96693906, 1.70789678, 0.43533761])]
 
 
 
@@ -201,7 +201,7 @@ To check if my Schau & Robinson implementation is working I need a couple of thi
 
 
      Obtained 
-    : [array([9.29390355, 5.74736256, 4.78577311]), array([0.33305026, 1.47315346, 1.61264748])]
+    : [array([ 1.8754065 , 42.44464966, 99.41354592]), array([1.96693906, 1.70789678, 0.43533761])]
 
 
 
@@ -209,7 +209,7 @@ To check if my Schau & Robinson implementation is working I need a couple of thi
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.103 seconds)
+   **Total running time of the script:** ( 0 minutes  0.093 seconds)
 
 
 .. _sphx_glr_download_prototyping_plot_schau_robinson.py:

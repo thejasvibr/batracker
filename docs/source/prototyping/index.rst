@@ -14,90 +14,6 @@ work, and  then refine them as they go into the main module.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Prototyping module: Schau &amp; Robinson 1987">
-
-.. only:: html
-
- .. figure:: /prototyping/images/thumb/sphx_glr_plot_schau_robinson_thumb.png
-     :alt: Prototyping module: Schau & Robinson 1987
-
-     :ref:`sphx_glr_prototyping_plot_schau_robinson.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /prototyping/plot_schau_robinson
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Solution 1:          #. Do the cross-correlation anyway - the multiple peaks might be picked up...">
-
-.. only:: html
-
- .. figure:: /prototyping/images/thumb/sphx_glr_plot_overlapping_cross_correlation_thumb.png
-     :alt: When calls arrive almost/overlapping
-
-     :ref:`sphx_glr_prototyping_plot_overlapping_cross_correlation.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /prototyping/plot_overlapping_cross_correlation
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Time-difference-of-arrival estimation">
-
-.. only:: html
-
- .. figure:: /prototyping/images/thumb/sphx_glr_plot_tdoa_prototyper_thumb.png
-     :alt: Time-difference-of-arrival estimation
-
-     :ref:`sphx_glr_prototyping_plot_tdoa_prototyper.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /prototyping/plot_tdoa_prototyper
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Threshold detector protoyping">
-
-.. only:: html
-
- .. figure:: /prototyping/images/thumb/sphx_glr_plot_threshold_detector_thumb.png
-     :alt: Threshold detector protoyping
-
-     :ref:`sphx_glr_prototyping_plot_threshold_detector.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /prototyping/plot_threshold_detector
-
-.. raw:: html
-
     <div class="sphx-glr-thumbcontainer" tooltip="Start to end prototype example">
 
 .. only:: html
@@ -116,69 +32,6 @@ work, and  then refine them as they go into the main module.
    :hidden:
 
    /prototyping/plot_start_to_end
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="I&#x27;d had a similar experience while working on the beamshape modelling  project with Gogo, where...">
-
-.. only:: html
-
- .. figure:: /prototyping/images/thumb/sphx_glr_implementing_mpmath_friedlander_thumb.png
-     :alt: The solutions I was getting using NumPy weren't
-
-     :ref:`sphx_glr_prototyping_implementing_mpmath_friedlander.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /prototyping/implementing_mpmath_friedlander
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="In this prototyping example, the simplest algorithm is used to find correspondences.  The maxim...">
-
-.. only:: html
-
- .. figure:: /prototyping/images/thumb/sphx_glr_plot_correspondence_matching_thumb.png
-     :alt: Correspondence matching prototyping
-
-     :ref:`sphx_glr_prototyping_plot_correspondence_matching.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /prototyping/plot_correspondence_matching
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="References ---------- [1] Friedlander, B. (1987). A passive localization algorithm and its accu...">
-
-.. only:: html
-
- .. figure:: /prototyping/images/thumb/sphx_glr_implementing_frielander1987_thumb.png
-     :alt: Implementing Friedlander 1987
-
-     :ref:`sphx_glr_prototyping_implementing_frielander1987.py`
-
-.. raw:: html
-
-    </div>
-
-
-.. toctree::
-   :hidden:
-
-   /prototyping/implementing_frielander1987
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
@@ -193,13 +46,13 @@ work, and  then refine them as they go into the main module.
 
   .. container:: sphx-glr-download sphx-glr-download-python
 
-    :download:`Download all examples in Python source code: prototyping_python.zip <//home/autumn/Documents/trying_out/batracker/docs/source/prototyping/prototyping_python.zip>`
+    :download:`Download all examples in Python source code: prototyping_python.zip <//home/autumn/Documents/research-repos/batracker/docs/source/prototyping/prototyping_python.zip>`
 
 
 
   .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-    :download:`Download all examples in Jupyter notebooks: prototyping_jupyter.zip <//home/autumn/Documents/trying_out/batracker/docs/source/prototyping/prototyping_jupyter.zip>`
+    :download:`Download all examples in Jupyter notebooks: prototyping_jupyter.zip <//home/autumn/Documents/research-repos/batracker/docs/source/prototyping/prototyping_jupyter.zip>`
 
 
 .. only:: html

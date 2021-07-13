@@ -69,7 +69,7 @@ Broad findings:
 
  .. code-block:: none
 
-    /home/autumn/Documents/trying_out/batracker/batracker/tests/prototyping/plot_overlapping_cross_correlation.py:42: DeprecationWarning: `hanning` is deprecated, use `scipy.signal.windows.hann` instead!
+    /home/autumn/Documents/research-repos/batracker/batracker/tests/prototyping/plot_overlapping_cross_correlation.py:42: DeprecationWarning: `hanning` is deprecated, use `scipy.signal.windows.hann` instead!
       call *= signal.hanning(call.size)
 
 
@@ -127,7 +127,7 @@ close to  each other.
     /home/autumn/anaconda3/envs/batracker/lib/python3.7/site-packages/matplotlib/axes/_axes.py:7531: RuntimeWarning: divide by zero encountered in log10
       Z = 10. * np.log10(spec)
 
-    <matplotlib.collections.LineCollection object at 0x7f4b51fbc7b8>
+    <matplotlib.collections.LineCollection object at 0x7f58eed48390>
 
 
 
@@ -176,7 +176,7 @@ What happens if one call is louder than the other in the channel with overlaps
     /home/autumn/anaconda3/envs/batracker/lib/python3.7/site-packages/matplotlib/axes/_axes.py:7531: RuntimeWarning: divide by zero encountered in log10
       Z = 10. * np.log10(spec)
 
-    <matplotlib.collections.LineCollection object at 0x7f4b51e6a860>
+    <matplotlib.collections.LineCollection object at 0x7f58eeb9c518>
 
 
 
@@ -241,7 +241,7 @@ be interpreted badly. Now, let's equalise the waveform somehow.
  .. code-block:: none
 
 
-    <matplotlib.collections.LineCollection object at 0x7f4b51d1b630>
+    <matplotlib.collections.LineCollection object at 0x7f58ee9c3940>
 
 
 
@@ -291,7 +291,7 @@ be amplified -- and mess up the CC.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.305 seconds)
+   **Total running time of the script:** ( 0 minutes  1.548 seconds)
 
 
 .. _sphx_glr_download_prototyping_plot_overlapping_cross_correlation.py:
