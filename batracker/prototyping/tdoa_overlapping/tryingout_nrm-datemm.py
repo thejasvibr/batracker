@@ -39,8 +39,6 @@ def get_tdoa_matrix(source_estimate, array):
     return tdoas
 #%% 
 
-
-
 # make simulated audio and generate cross-cor + auto-cor
 vsound = 338.0
 
@@ -122,7 +120,6 @@ for pair, tdes in crosscor_peaks.items():
 
 # and then fuse the dictionary with the old one 
 comprehensive_crosscorpeaks.update(crosscor_peaks)
-
 
 #%% Make all triples and check their consistency
 all_triples = list(combinations(range(4), 3))
@@ -355,18 +352,33 @@ for each in quadruplets:
 print(quadruple_reproj_errors)
 print(quadruple_consistency)
 
+dB = lambda X: 20*np.log10(X)
+
 plt.figure()
-plt.plot(quadruple_reproj_errors)
-#%%
-print('\n \n tdoa reprojection errors')
-quadruple_reproj_errors
+plt.plot(quadruple_consistency, dB(quadruple_reproj_errors),'*')
+
+plt.figure()
+plt.plot(dB(quadruple_reproj_errors))
 
 #%%
-print('\n \n estimated positions')
-estimated_positions
-# get all unique positions 
+# get the loest 6 dB reprojection errors
+lowest_6db_errors = dB(quadruple_reproj_errors) <= np.min(dB(quadruple_reproj_errors))+6
+# get the most consistent quadruplets 
+most_consistent = quadruple_consistency >= np.percentile(quadruple_consistency, 75)
+# combine the two
+best_candidates = np.logical_and(lowest_6db_errors, most_consistent)
 
+best_candidate_positions = [ estimated_positions[i] for i,each in enumerate(best_candidates) if each]
 
+# get unique positions
+positions_as_list = [tuple(each) for each in best_candidate_positions]
+best_positions = set(positions_as_list)
 
+#%%
+# Having filtered all possible candidates using the reprojection error and 
+# quadruplet consistency -- let's print it out!
 
+print(best_positions)
 
+#%% 
+# We actually managed to recover the sound source positions that were simulated!!
