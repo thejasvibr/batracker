@@ -104,6 +104,41 @@ def spiesberger_wahlberg_solution(array_geometry, d, **kwargs):
             each += mic1
     return s
 
+
+def sw_choose_robust_better_solution(obs_rangediffs, sources, micgeom):
+    '''
+    The 'robustness' comes from the fact that the TDOAs are not just checked
+    for overall error - but also for flipped 'polarities'...TDOA & -1*TDOA
+    
+    Parameters
+    ----------
+    obs_rangediffs : (N,) np.array
+        Nmics-1 range differences w.r.t reference mic. 
+    sources : list with (3,) np.arrays
+        Candidate sources predicted for a given array geometry
+    micgeom : (Nmics,3) np.array
+        Microphone geometry xyz coordinates. One mic per row.
+
+    Returns
+    -------
+    better_solution : (3,) np.array
+        xyz coordinates of the best solution. 
+    
+
+    '''
+    minerror_in_prediction = []
+    for i, source in enumerate(sources):
+        pred_tdoas = generate_tdoa_predictions(source, micgeom)
+        pred_tdoas = pred_tdoas[:mic_geom.shape[0]-1]
+        pred_rangediff = pred_tdoas*vsound
+        polarities = np.array([1,-1])
+        tdoas_polarities = polarities*pred_rangediff
+        tdoas_deviations = tdoas_polarities - obs_rangediffs.reshape(-1,1)
+        median_error = np.median(abs(tdoas_deviations), axis=0)
+        minerror_in_prediction.append(np.min(median_error))
+    better_solution = sources[np.argmin(minerror_in_prediction)]
+    return better_solution
+
 if __name__ == '__main__':
     
     R = 1.2 # meters

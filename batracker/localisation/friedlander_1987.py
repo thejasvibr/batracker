@@ -190,7 +190,10 @@ def make_valid_i_array(j, num_channels):
         num_channels-1 array with all channel numbers apart from j.        
     '''
     valid_i_array = np.arange(num_channels)
-    value_to_delete = int(np.argwhere(valid_i_array==j))
+    try:
+        value_to_delete = int(np.argwhere(valid_i_array==j))
+    except:
+        value_to_delete = np.argwhere(valid_i_array==j)[0]
     valid_i_array = np.delete(valid_i_array, value_to_delete)
     return valid_i_array
     
