@@ -113,7 +113,7 @@ def sw_tau51_better_solution(obs_rangediffs, sources, micgeom, vsound=340):
     Parameters
     ----------
     obs_rangediffs : (Nmics-1,) np.array
-        The rangedifferences with ref the first channel in meters. 
+        The range differences with ref the first channel in meters. 
     sources : list with Nsources entries. Each source is a (3,) np.array
         List with candidate sources for a given range difference
     micgeom : (Nmics,3) np.array
@@ -122,7 +122,7 @@ def sw_tau51_better_solution(obs_rangediffs, sources, micgeom, vsound=340):
     
     Notes
     -----
-    According to Spiesberger & Wahlberg 2002: 'For each ambiguous source location, one
+    According to Spiesberger & Wahlberg 2002 (JASA): 'For each ambiguous source location, one
     can generate a model for t 51 and choose the root for t1 that
     yields a model for t 51 that is closest to that measured' - where they talk about 
     the 5 channel case allowing the selection of the correct source location. 
@@ -144,39 +144,6 @@ def sw_tau51_better_solution(obs_rangediffs, sources, micgeom, vsound=340):
     better_solution = sources[np.argmin(minerror_in_prediction)]
     return better_solution
 
-def sw_choose_robust_better_solution(obs_rangediffs, sources, micgeom, vsound=343.0):
-    '''
-    The 'robustness' comes from the fact that the TDOAs are not just checked
-    for overall error - but also for flipped 'polarities'...TDOA & -1*TDOA
-    
-    Parameters
-    ----------
-    obs_rangediffs : (N,) np.array
-        Nmics-1 range differences w.r.t reference mic. 
-    sources : list with (3,) np.arrays
-        Candidate sources predicted for a given array geometry
-    micgeom : (Nmics,3) np.array
-        Microphone geometry xyz coordinates. One mic per row.
-    vsound: float>0, optional
-        Speed of sound. Defaults to 343 m/s
-
-    Returns
-    -------
-    better_solution : (3,) np.array
-        xyz coordinates of the best solution. 
-    '''
-    minerror_in_prediction = []
-    for i, source in enumerate(sources):
-        pred_tdoas = generate_tdoa_predictions(source, micgeom)
-        pred_tdoas = pred_tdoas[:micgeom.shape[0]-1]
-        pred_rangediff = pred_tdoas*vsound
-        polarities = np.array([1,-1])
-        tdoas_polarities = polarities*pred_rangediff
-        tdoas_deviations = tdoas_polarities - obs_rangediffs.reshape(-1,1)
-        error_index = np.max(abs(tdoas_deviations), axis=0)
-        minerror_in_prediction.append(np.min(error_index))
-    better_solution = sources[np.argmin(minerror_in_prediction)]
-    return better_solution
 
 if __name__ == '__main__':
     
@@ -203,9 +170,7 @@ if __name__ == '__main__':
     #d = np.array([0.00128646, 0.00266667, 0.00220833])*338
     outputs = spiesberger_wahlberg_solution(Ro, d)
     print(outputs)
-    
-    better_solution = sw_choose_robust_better_solution(d, outputs, Ro)
-    print('\n',source_pos, better_solution)
+
     
     #%%
     sourcepos = np.array([7.79179179, -1.86586587  ,6.302302])
@@ -219,9 +184,7 @@ if __name__ == '__main__':
     nmics = micgeom.shape[0]
     rangediff = tdoas[:nmics-1]*340
     output_positions = spiesberger_wahlberg_solution(micgeom, rangediff)
-    better_solution = sw_choose_robust_better_solution(rangediff,
-                                                            output_positions,
-                                                            micgeom)
+    
     bet_soln = sw_tau51_better_solution(rangediff, output_positions, 
                                         micgeom)
     print('actual source:', sourcepos )
