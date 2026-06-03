@@ -23,6 +23,7 @@ common coordinate values.
 import numpy as np 
 import scipy.spatial as spatial
 matmul = np.matmul
+from batracker.localisation.tdoa_simulation import generate_tdoa_predictions
 
 def spiesberger_wahlberg_solution(array_geometry, d, **kwargs):
     '''
@@ -105,7 +106,45 @@ def spiesberger_wahlberg_solution(array_geometry, d, **kwargs):
     return s
 
 
-def sw_choose_robust_better_solution(obs_rangediffs, sources, micgeom):
+def sw_tau51_better_solution(obs_rangediffs, sources, micgeom, vsound=340):
+    '''
+    Choosing the correct solution from SW2002 based on the TDOA of the last channel pair. 
+    
+    Parameters
+    ----------
+    obs_rangediffs : (Nmics-1,) np.array
+        The rangedifferences with ref the first channel in meters. 
+    sources : list with Nsources entries. Each source is a (3,) np.array
+        List with candidate sources for a given range difference
+    micgeom : (Nmics,3) np.array
+    vsound : float>0, optional
+        Defaults to 340 m/s
+    
+    Notes
+    -----
+    According to Spiesberger & Wahlberg 2002: 'For each ambiguous source location, one
+    can generate a model for t 51 and choose the root for t1 that
+    yields a model for t 51 that is closest to that measured' - where they talk about 
+    the 5 channel case allowing the selection of the correct source location. 
+    
+    Here I've generalised it to include the last channel pair in general - and simulation tests
+    indicate this does a good job of choosing the correct source. 
+    
+    '''
+    minerror_in_prediction = []
+    nmics = micgeom.shape[0]
+    if nmics <=4:
+        raise ValueError(f'{nmics} mics detected - SW2002 only gives reliable selection >=5 channels!')
+    for i, source in enumerate(sources):
+        pred_tdoas = generate_tdoa_predictions(source, micgeom)
+        pred_tdoas = pred_tdoas[:micgeom.shape[0]-1]
+        pred_rangediff = pred_tdoas*vsound
+        error_index = pred_rangediff[-1] - obs_rangediffs[-1]
+        minerror_in_prediction.append(abs(error_index))
+    better_solution = sources[np.argmin(minerror_in_prediction)]
+    return better_solution
+
+def sw_choose_robust_better_solution(obs_rangediffs, sources, micgeom, vsound=343.0):
     '''
     The 'robustness' comes from the fact that the TDOAs are not just checked
     for overall error - but also for flipped 'polarities'...TDOA & -1*TDOA
@@ -118,24 +157,24 @@ def sw_choose_robust_better_solution(obs_rangediffs, sources, micgeom):
         Candidate sources predicted for a given array geometry
     micgeom : (Nmics,3) np.array
         Microphone geometry xyz coordinates. One mic per row.
+    vsound: float>0, optional
+        Speed of sound. Defaults to 343 m/s
 
     Returns
     -------
     better_solution : (3,) np.array
         xyz coordinates of the best solution. 
-    
-
     '''
     minerror_in_prediction = []
     for i, source in enumerate(sources):
         pred_tdoas = generate_tdoa_predictions(source, micgeom)
-        pred_tdoas = pred_tdoas[:mic_geom.shape[0]-1]
+        pred_tdoas = pred_tdoas[:micgeom.shape[0]-1]
         pred_rangediff = pred_tdoas*vsound
         polarities = np.array([1,-1])
         tdoas_polarities = polarities*pred_rangediff
         tdoas_deviations = tdoas_polarities - obs_rangediffs.reshape(-1,1)
-        median_error = np.median(abs(tdoas_deviations), axis=0)
-        minerror_in_prediction.append(np.min(median_error))
+        error_index = np.max(abs(tdoas_deviations), axis=0)
+        minerror_in_prediction.append(np.min(error_index))
     better_solution = sources[np.argmin(minerror_in_prediction)]
     return better_solution
 
@@ -162,4 +201,34 @@ if __name__ == '__main__':
         d_matrix[i] = spatial.distance.euclidean(Ro[i,:], source_pos)
     d = (d_matrix[1:] - d_matrix[0])
     #d = np.array([0.00128646, 0.00266667, 0.00220833])*338
-    print(spiesberger_wahlberg_solution(Ro, d))
+    outputs = spiesberger_wahlberg_solution(Ro, d)
+    print(outputs)
+    
+    better_solution = sw_choose_robust_better_solution(d, outputs, Ro)
+    print('\n',source_pos, better_solution)
+    
+    #%%
+    sourcepos = np.array([7.79179179, -1.86586587  ,6.302302])
+    micgeom = np.array([[-3.13057326,  3.34174603,  3.56756099],
+                     [-9.73651937, -5.29910719,  3.19106483],
+                     [-9.09807254,  9.86464726, -1.3601096 ],
+                     [-1.50989502, -6.33514563, -4.63342018],
+                     [ 0.6214693,   4.81233551, -1.56560442]])
+    from batracker.localisation.tdoa_simulation import generate_tdoa_predictions
+    tdoas = generate_tdoa_predictions(sourcepos, micgeom, vsound=340)
+    nmics = micgeom.shape[0]
+    rangediff = tdoas[:nmics-1]*340
+    output_positions = spiesberger_wahlberg_solution(micgeom, rangediff)
+    better_solution = sw_choose_robust_better_solution(rangediff,
+                                                            output_positions,
+                                                            micgeom)
+    bet_soln = sw_tau51_better_solution(rangediff, output_positions, 
+                                        micgeom)
+    print('actual source:', sourcepos )
+    for source in output_positions:
+        tdoas_source = generate_tdoa_predictions(source, micgeom, vsound=340)
+        print(source, tdoas[nmics-1], tdoas_source[nmics-1])
+    
+    
+    
+    

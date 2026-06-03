@@ -6,7 +6,7 @@ Tests for Spiesberger & Wahlberg 2002
 
 import unittest 
 import numpy as np 
-np.random.seed(82319)
+np.random.seed(78464)
 import scipy.spatial as spatial
 
 from batracker.localisation import spiesberger_wahlberg_2002 as sw02
@@ -102,7 +102,35 @@ class SimpleTest(unittest.TestCase):
             match.append(match_result)
 
         self.assertTrue(np.all(match))
-        
+
+
+class SW2002BetterSolutionPicking(unittest.TestCase):
+    def setUp(self):
+        self.vsound = 340
+    
+    def create_simsources(self):    
+        n_mics = int(np.random.choice(np.arange(5,20), 1))
+        array_geom = np.random.normal(0,1,n_mics*3).reshape(n_mics,-1)
+        array_geom *= 5
+        source_position = np.random.choice(np.linspace(-8,8,1000), 3)
+        tdoas = sw02.generate_tdoa_predictions(source_position, array_geom, vsound=self.vsound)
+        return tdoas, array_geom, source_position
+    
+    def test_correctsolution_being_picked(self):
+        for i in range(1000):
+            tdoas, micgeom, actual_source = self.create_simsources()
+            nmics = micgeom.shape[0]
+            rangediff = tdoas[:nmics-1]*self.vsound
+            output_positions = sw02.spiesberger_wahlberg_solution(micgeom, rangediff)
+            better_solution = sw02.sw_tau51_better_solution(rangediff,
+                                                                    output_positions,
+                                                                    micgeom)
+            correct_source_chosen = np.allclose(better_solution, actual_source)
+            
+            if not correct_source_chosen:
+                print(actual_source, better_solution, output_positions)
+                print('\\n', micgeom)
+            self.assertTrue(correct_source_chosen)
 
 if __name__ == '__main__':
     unittest.main()      
