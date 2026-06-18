@@ -70,7 +70,21 @@ class SimpleTest(unittest.TestCase):
         
         all_true = np.allclose(np.array(all_calc_positions).reshape(-1,3),
                                multiple_points, atol=1e-2)
-        
+    
+    
+    def test_multiple_points_arbit_geom(self):
+        atleast_onecorrect_solution = []
+        for i in range(100):
+            micxyz = np.random.normal(0,1,12).reshape(-1,3)*4
+            source = np.array([1,2,3])
+            d = self.calculate_d_matrix(micxyz, source)
+            output_positions = sr87.schau_robinson_solution(micxyz, d)
+            num_matches = []
+            for each in output_positions:
+                    num_matches.append(np.allclose(source, each, atol=10**-2))
+            atleast_onecorrect_solution.append(sum(num_matches)>0)
+        self.assertTrue(np.all(atleast_onecorrect_solution))
+    
     def test_withgreaterthan4mics(self):
         '''
         A 15 microphone array placed everywhere
