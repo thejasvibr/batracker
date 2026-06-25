@@ -1,5 +1,5 @@
 # batracker
-This is a (not-so) stable package to perform acoustic localisation. Especially the ```localisation``` module is heavily in use by members of the [Active Sensing Collectives](activesensingcollectives.com) lab. 
+This is a (not-so) stable package to perform acoustic localisation. Especially the ```localisation``` module is heavily in use by members of the [Active Sensing Collectives Lab](https://www.activesensingcollectives.com/). 
 
 ### What batracker does 
 
